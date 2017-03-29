@@ -15,7 +15,38 @@ class Colored<T extends HasColor>{
         return item.getColor();// extends HasColor 边界允许这个方法的调用。
     }
 }
-
+class Dimension{
+    public int x,y,z;
+}
+//class ColoredDimension<T extends HasColor& Dimension >{  第一个必须是类，后面才是接口，顺序不可反。
+class ColoredDimension<T extends Dimension & HasColor>{
+    T item;
+    ColoredDimension(T item){
+        this.item=item;
+    }
+    T getItem(){
+        return item;
+    }
+    java.awt.Color color(){
+        return item.getColor();
+    }
+    int getX(){ return item.x;}
+    int getY(){return item.y;}
+    int getZ(){return item.z;}
+}
+interface Weight{
+    int weight();
+}
+//只能有一个类，但是可以有多个接口
+class Solid<T extends Dimension & HasColor & Weight>{
+    T item;
+    Solid(T item){
+        this.item=item;
+    }
+    T getItem(){
+        return item;
+    }
+}
 public class Main {
 
     public static void main(String[] args) {
