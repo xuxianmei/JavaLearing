@@ -1,0 +1,26 @@
+package com.tlxxm.learing;
+
+enum Shrubbery{
+    GROUND,
+    CRAWLING,
+    HANGING
+}
+public class EnumClass {
+
+    public static void main(String[] args) {
+        for(Shrubbery s : Shrubbery.values()){
+            System.out.println(s+" ordinal："+s.ordinal());
+            System.out.println("compareTo(Shrubbery.CRAWLING)："+s.compareTo(Shrubbery.CRAWLING)+" ");
+            System.out.println("equals(Shrubbery.CRAWLING)："+s.equals(Shrubbery.CRAWLING)+" ");
+            System.out.println("==Shrubbery.CRAWLING："+(s==Shrubbery.CRAWLING));
+            System.out.println("getDeclaringClass()："+s.getDeclaringClass());
+            System.out.println("name()："+s.name());
+            System.out.println("------------------");
+        }
+
+        for(String s :"HANGING CRAWLING GROUND".split(" ")){
+            Shrubbery shrub=Enum.valueOf(Shrubbery.class,s);
+            System.out.println(shrub);
+        }
+    }
+}
