@@ -39,10 +39,13 @@ host是远程主机的名称或ip地址，port是连接远程应用程序的端�
 	Socket socket = new Socket("127.0.0.1", 80);
 
 一旦成功地创建了Socket类的实例，就可以使用该实例发送或接收字节流。
-* 发送字节流  
+* 发送字节流   
+
 	需要调用Socket类的getOutputStream()方法获取一个java.io.OutputStream对象。
 	要发送文本，通过使用返回的OutputStream对象创建一个java.io.PrintWriter对象。
-* 接收字节流
+
+* 接收字节流  
+
 	想从连接的另一端接收字节流，需要调用Socket类的getInputStream()方法，返回一个  
 	java.io.InputStream对象
 
@@ -122,20 +125,20 @@ ServerSocket类与Socket类并不相同。
 
 # 应用程序
 
-* 侦听
+* 侦听  
 	该程序，侦听127.0.0.1:8085。
 
-* 功能
+* 功能  
 	这个Web服务器可以处理对指定目录中的静态资源的请求
 
-* 资源目录
+* 资源目录  
 	该目录包括由变量WEB_ROOT指定的目录及其子目录。在程序中，这个变量值为webroot。
 
-* 请求
+* 请求  
 	如果要请求静态资源，可以在浏览器中输入如下URL:
 		http://macineName:port/staticRescorce
 
-* 关闭服务器
+* 关闭服务器  
 	程序中，定义了关闭命令。
 	若要关闭服务器，输入如下URL：
 		http://macineName:port/SHUTDOWN
