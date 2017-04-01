@@ -126,24 +126,30 @@ ServerSocket类与Socket类并不相同。
 # 应用程序
 
 * 侦听  
+
 	该程序，侦听127.0.0.1:8085。
 
 * 功能  
+
 	这个Web服务器可以处理对指定目录中的静态资源的请求
 
 * 资源目录  
+
 	该目录包括由变量WEB_ROOT指定的目录及其子目录。在程序中，这个变量值为webroot。
 
 * 请求  
+
 	如果要请求静态资源，可以在浏览器中输入如下URL:
 		http://macineName:port/staticRescorce
 
 * 关闭服务器  
+
 	程序中，定义了关闭命令。
 	若要关闭服务器，输入如下URL：
 		http://macineName:port/SHUTDOWN
 
 * [源代码](src/ex01/src/com/tlxxm/learing)
+
 	[HttpServer.java](src/ex01/src/com/tlxxm/learing/HttpServer.java)
 	[Request.java](src/ex01/src/com/tlxxm/learing/Request.java)
 	[Response.java](src/ex01/src/com/tlxxm/learing/Response.java)
@@ -160,6 +166,7 @@ await()方法会创建一个ServerSocket实例，然后进入一个while循环�
 进入await()方法以后，并接收到了一个新的请求。
 
 1. 获取Socket	
+
 		socket = serverSocket.accept();
 		input = socket.getInputStream();
 		output = socket.getOutputStream();
@@ -167,30 +174,35 @@ await()方法会创建一个ServerSocket实例，然后进入一个while循环�
 	并从该实例对象中获取java.io.InputStream和java.io.OutputStream对象实例。	
 
 2. 创建Request对象
+
 		 Request request = new Request(input);
     	 request.parse();
 	在await()方法中，创建一个Request对象，并调用其parse()方法来解析HTTP请求的原始数据，
 	得到想要的关键项。
 
 3. 创建Response对象
+
 		Response response = new Response(output);
         response.setRequest(request);
         response.sendStaticResource();
 	创建一个Response对象，并调用它的两个方法。
 4. 关闭Socket
+
 	 socket.close();
 	关闭当前accept()返回的Socket对象。
 
 5. 退出循环等待
+
 	如果是shutdown命令，且，退出循环等待，不再监听，程序结束。
 	否则，继续侦听。
 
 ## Request.java
-	此类用来表示一个请求。通过传递Socket的InputStream来创建Request对象。
 	
-	该类，主要就是根据请求信息来创建一个合格的Request对象，并解析请求的原始数据，填充类内  
-	数据字段。
-	主要的两个方法
+此类用来表示一个请求。通过传递Socket的InputStream来创建Request对象。
+	
+该类，主要就是根据请求信息来创建一个合格的Request对象，并解析请求的原始数据，填充类内  
+数据字段。
+主要的两个方法
 * parse()
 	根据Socket的InputStream来获取请求的原始信息，并对其进行读取解析，设置相应的uri字段。
 * getUri()
