@@ -97,7 +97,7 @@ ServletResponse对象则封装servlet的响应信息。
 * 若请求一个静态资源，则调用StaticResourceProcessor对象的process()方法，传入servletRequest对象和servletResponse对象；
 * 若请求的是servlet，则载入相应的servlet类，并调用其service()方法，传入servletRequest对象和servletResponse对象；
 
-# 源代码
+# [源代码](src/ex02/src/com/tlxxm/learing)
 
 * [HttpServer1.java](src/ex02/src/com/tlxxm/learing/HttpServer1.java)
 * [Request.java](src/ex02/src/com/tlxxm/learing/Request.java)
