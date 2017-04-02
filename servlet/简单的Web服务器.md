@@ -1,10 +1,25 @@
 # HTTP
 
-## HTTP协议
+## HTTP
+HTTP是应用程的一种协议，主要用于Web浏览器和Web服务器的通信协议规定。
+基于“请求-响应”的协议。底层传输协议使用的是TCP。
 
 ## HTTP请求
 
+
+	<method> <request-URL> <version>
+	<headers>
+
+	<entity-body>
+
+
 ## HTTP响应
+
+	<version> <status> <reason-phrase>
+	<headers>
+
+	<entity-body>
+
 
 # Socket类
 
@@ -204,8 +219,10 @@ await()方法会创建一个ServerSocket实例，然后进入一个while循环�
 数据字段。
 主要的两个方法
 * parse()
+
 	根据Socket的InputStream来获取请求的原始信息，并对其进行读取解析，设置相应的uri字段。
 * getUri()
+
 	返回根据请求原始信息，生成的uri信息。
 
 
