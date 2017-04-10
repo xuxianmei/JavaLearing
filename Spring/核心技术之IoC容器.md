@@ -703,8 +703,55 @@ userManager就一个singletion scoped bean，在本例中，userManager在容器
 
 然后这与userPreferences本身是想在违背的。
 
-事实你需要的应该是，UserManager在容器中只会存在一个，它的其它引用，应该根据bean本身的scope  
-情景出现，在本例中UserPreferences应该是每一个HTTP Session都有一个新的实例化对象。
+事实你需要的应该是，UserManager在容器中只会存在一个，它的其它引用，应该根据bean本身的scope情景出现，在本例中UserPreferences应该是每一个HTTP Session都有一个新的实例化对象。
 
 当使用`<aop:scoped-proxy/>`时，容器会为此bean创建一个具有同样公共接口的对象，
-page:106
+
+在这个例子中，当一个UserManager实例调用UserPreferences对象上的一个方法时，实际是调用  
+proxy对象上的方法，这个proxy对象获取真实的UserPreferences对象（本例从HTTP Session中获得），然后委托调用返回的UserPreferences对象上的方法。
+
+	<bean id="userPreferences" class="com.foo.UserPreferences" scope="session">
+		<aop:scoped-proxy/>
+	</bean>
+	<bean id="userManager" class="com.foo.UserManager">
+		<property name="userPreferences" ref="userPreferences"/>
+	</bean>
+
+request-scoped,session-scoped,globalSession-scoped都一样。
+
+**选择创建何种类型的proxy**
+
+默认，当Spring Container为一个使用了`<aop:scoped-proxy/>`子元素bean创建一个proxy时，就会创建一个CGLIB-based class proxy。
+
+CGLIB-based proxy只会拦截public方法的调用。
+
+后续还将介绍 class-based和 interface-based proxying。
+
+
+## 5.5 自定义scopes
+
+
+#6. 定制bean性质
+
+## 6.1 生命周期的回调
+
+## 6.2 
+
+#7. Bean definition 继承
+
+#8. 容器扩展点
+
+#9. Annotation-based container configuration
+
+
+#10.类路径 扫描和管理的componetns
+
+#11. 使用JSR 330标准注解
+
+#12. Java-based container configuration
+
+# 13. 环境抽象
+
+#14. BeanFactory
+
+# 15.ApplicationContext 额外的能力
