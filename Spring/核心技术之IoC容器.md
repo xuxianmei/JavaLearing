@@ -508,9 +508,203 @@ Spring的 conversion service被用来进行数据类型转换。下面是更简�
 
 使用ref元素，
 
-# Bean范围(Bean scopes)
+# 5. Bean范围(Bean scopes)
+Spring Framework支持七种scopes，如果使用关于web的ApplicationContext，其中5种可用。
+
+| scope | Description|
+|---|---|
+|singleton|默认scope，在每个Spring IoC container中，一个bean definition对应单例|
+|prototype|多个实例对象对应一个bean definition|
+|request| 每一个HTTP请求，都会有一个单例实例对象对应，只有使用web相关的ApplicationContext时可用。|
+|session|每一个HTTP session,都有一个单例对象对应，只有使用web相关的ApplicationContext时可用。|
+|globalSession|每一个 global HTTP session，都有一个单例对象对应，只有使用web相关的ApplicationContext时可用。|
+|application|一个ServletContext的生命周期内，有一个单例对象对应，只有使用web相关的ApplicationContext时可用。|
+|websocket|一个WebSocket的生命周期内，有一个单例对象对应，只有使用web相关的ApplicationContext时可用。|
 
 
-#
+## 5.1 singleton scope
+Spring中的默认scope。
+在同一个容器内，所有关于此bean的请求引用，都返回同一个实例对象。
+
+	<bean id="accountService" class="com.foo.DefaultAccountService"/>
+	<!-- the following is equivalent, though redundant (singleton scope is the default) -->
+	<bean id="accountService" class="com.foo.DefaultAccountService" scope="singleton"/>
+![singletonscope](images/singletonScope.png)
+
+## 5.2 prototype scope
+同一个容器中，每一次关于此bean的请求引用，都返回一个新的实例对象。
+
+	<bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/>
+![prototypeScope](images/prototypeScope.png)
+
+与其它scope不同的是，Spring不会对此类型的bean进行回收和清理。
 
 
+## 5.3 Request,session,global session,application,and WebSocket scopes
+这些scope只在使用关于web的Spring ApplicationContext的实现中可用，比如
+XmlWebApplicationContext。
+
+### 5.3.1 初始化Web configuration
+为了支持上述5种scope(web-scoped beans)，必须做一些初始化配置（initial configuration）。
+
+如果通过使用Spring Web Mvc，不需要做相应的配置，DispatcherServlet或DispatcherPortlet  
+已经完成了这部分的工作
+
+如果使用的是Servlet 2.5 Web容器，请求信息不通过DispatcherServlet（比如，JSF或Struts）时，你需要注册  
+org.springframework.web.context.request.RequestContextListener
+ServletRequestListener。
+
+如果使用的是Servlet 3.0+版本，可以通过WebApplicationInitializer接口来使用编程方式完成。
+如果是较老版本的容器，需要在web应用程序中的web.xml文件中添加如下声明：
+
+	<web-app>
+		...
+		<listener>
+			<listener-class>
+				org.springframework.web.context.request.RequestContextListener
+			</listener-class>
+		</listener>
+		...
+	</web-app>
+
+另外一种选择是，可以考虑使用Spring的RequestContextFilter，下面这些配置信息需根据实际情况调整：
+	
+	<web-app>
+		...
+		<filter>
+			<filter-name>requestContextFilter</filter-name>
+			<filter-class>org.springframework.web.filter.RequestContextFilter</filter-class>
+		</filter>
+		<filter-mapping>
+			<filter-name>requestContextFilter</filter-name>
+			<url-pattern>/*</url-pattern>
+		</filter-mapping>
+		...
+	</web-app>
+
+DispatcherServlet，RequestContextListener，RequestContextFilter做的工作是一样的，
+它们的工作就是绑定HTTP请求对象(HTTP request object)到服务于这个请求的进程(Thead)当中。
+
+### 5.3.2 Request scope
+Spring容器通过使用bean definition，为每一个HTTP请求，创建一个LoginAction实例对象，当HTTP请求完成时，此对象也会被舍弃。
+**XML-based：**
+
+	<bean id="loginAction" class="com.foo.LoginAction" scope="request"/>  
+
+
+
+**注解(annotaion-based)：**
+
+	@RequestScope
+	@Component
+	public class LoginAction {
+		// ...
+	}
+
+
+
+### 5.3.3 Session scope
+
+Spring容器通过使用bean definition,为每一个HTTP Session创建一个UserPreferences实例，当会话完成时，此对象会被舍弃。
+
+**XML-based：**
+
+	<bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/>
+
+**注解(annotaion-based)：**
+
+	@SessionScope
+	@Component
+	public class UserPreferences {
+		// ...
+	}
+
+
+### 5.3.4 Global session scope
+与Session scope类似。
+此scope只应用在portlet-based的web应用程序，此scope在所有的portlets之间共享，
+如果使用此scope在Servlet-based的web应用程序中，其实使用的就是上面的 Session scope，不会  
+报任何错误。
+**XML-based：**
+
+	<bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/>
+
+
+### 5.3.4 Application scope
+
+Spring 容器通过使用bean definition,只为整个web 应用程序创建一次实例化对象，即只一个此对象实例存在。
+此scope位于ServletContext level，存储为ServletContext的一个常规属性。
+这与Spring singleton bean有点类似，但它们有两个重要的不同点：
+1. Application scope是每个ServletContext上的一个单例，不是每个Spring ApplicationContext上的单例
+2. 可以通过访问ServletContext的属性获取到
+
+**XML-based：**
+
+	<bean id="appPreferences" class="com.foo.AppPreferences" scope="application"/>
+
+**注解(annotaion-based)：**
+
+	@ApplicationScope
+	@Component
+	public class AppPreferences {
+		// ...
+	}
+
+### 5.3.5 使用Scoped beans作为依赖
+
+Spring IoC Container不仅仅管理着beans的实例化，也管理着依赖对象的装配工作。
+如果你需要注入一个HTTP request scoped的bean到一个scope更加长久的bean当中时，
+可能会选择在注入一个AOP 代理(proxy)，用来替代这个scoped bean。
+这意味着，你需要注入一个与scoped bean具有同样的public接口的proxy对象来作为scoped bean，
+而且也会从相关的scope（比如一个 HTTP request）当中接收一个真实的目标对象，并委托在该真实的对象  
+上调用方法。
+
+*注：*
+>scoped proxies不是实现访问scopes更加短的beans惟一方法。
+
+
+	
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/aop
+			http://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+		<!-- an HTTP Session-scoped bean exposed as a proxy -->
+		<bean id="userPreferences" class="com.foo.UserPreferences" scope="session">
+			<!-- instructs the container to proxy the surrounding bean -->
+			<aop:scoped-proxy/>
+		</bean>
+	
+		<!-- a singleton-scoped bean injected with a proxy to the above bean -->
+		<bean id="userService" class="com.foo.SimpleUserService">
+			<!-- a reference to the proxied userPreferences bean -->
+			<property name="userPreferences" ref="userPreferences"/>
+		</bean>
+	</beans>
+
+为了创建这样的一个代理(proxy)，你需要在一个scoped bean definition中，
+插入一个子元素`<aop:scoped-proxy/>`。
+为什么scope为request、session、globalSession和custom-scope等级的beans需要  
+`<aop:scoped-proxy/>`元素？
+
+比如：
+
+	<bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/>
+	<bean id="userManager" class="com.foo.UserManager">
+		<property name="userPreferences" ref="userPreferences"/>
+	</bean>
+
+userManager就一个singletion scoped bean，在本例中，userManager在容器中只会被实例化一次， 
+并且，如果不使用`<aop:scoped-proxy/>`,它的依赖 userPreferences，也只会被实例化一次到此bean当中。
+
+然后这与userPreferences本身是想在违背的。
+
+事实你需要的应该是，UserManager在容器中只会存在一个，它的其它引用，应该根据bean本身的scope  
+情景出现，在本例中UserPreferences应该是每一个HTTP Session都有一个新的实例化对象。
+
+当使用`<aop:scoped-proxy/>`时，容器会为此bean创建一个具有同样公共接口的对象，
+page:106
