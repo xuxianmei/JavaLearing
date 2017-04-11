@@ -734,12 +734,184 @@ CGLIB-based proxy只会拦截public方法的调用。
 #6. 定制bean性质
 
 ## 6.1 生命周期的回调
+为了影响容器中bean生命周期的管理，你可以实现Spring InitializingBean和DisposableBean接口。
+容器在之前调用afterPropertiesSet()，在之后调用destory()，来使bean在初始化和销毁时，完成确定  
+的动作。
+*注：*
+>  JSR-250 @PostConstruct 和 @PreDestroy 注解在现行的Spring应用程序中，是最好的考虑方案来接收  
+>  生命周期的回调，使用这些注解时，意味着可以将beans从Spring独有的接口中解耦出来。
+>  如果不使用此注解，也可以使用init-method和destroy-method对象定义metadata
 
-## 6.2 
+在Sping内部，Spring Framework使用BeanPostProcessor实现来完成查找回调接口并执行对应的方法。  
+
+如果你需要自定义一些特性或在Sping当中没有提供的开箱即用的生命周期行为，你可以自己来实现一个
+BeanPostProcessor。这将在容器扩展点里介绍。                                                                                                                                                                                                                                                                                                                                                                                                      
+
+Spring管理的对象，除了实例化和销毁时的回调，还可以通过实现Lifecycle接口，来驱动这些对象在容器  
+本身的启动和关闭来完成某些动作。
+
+### 6.1.1 实例化回调
+org.springframework.beans.factory.InitializingBean接口允许当容器为一个bean设置了所有  
+的必需属于以后，来完成实例化的工作（回调）。
+此接口只有一个方法:
+
+	void afterPropertiesSet() throws Exception;
+但是，并不推荐使用这个接口，因为对代码具有侵入性。
+相对的，可以通过使用@PostConstruct注解来指定一个POJO的初始化回调方法。
+
+**XML-based：**
+配置：
+
+	<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/>
+源代码：
+
+	public class ExampleBean {
+		public void init() {
+			// do some initialization work
+		}
+	}
+
+
+**使用InitializingBean接口**
+配置：
+
+	<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
+源代码：
+
+	public class AnotherExampleBean implements InitializingBean {
+		public void afterPropertiesSet() {
+			// do some initialization work
+		}
+	}
+对于XML-based的配置，使用init-method属性来指定方法名称
+对于Java config，使用@Bean的initMethod属性指定
+
+### 6.1.2 销毁方法回调
+org.springframework.beans.factory.DisposableBean接口，允许当Bean从容器中销毁时，执行  
+销毁相关的方法回调。
+此接口同样只有一个方法：
+
+	void destroy() throws Exception;
+同样，不推荐使用，因为没有从源码中解耦出来。推荐使用@PreDestroy注解。
+
+**XML-based：**
+配置：  
+
+	<bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/>
+源代码：
+
+	public class ExampleBean {
+		public void cleanup() {
+			// do some destruction work (like releasing pooled connections)
+		}
+	}
+
+**使用DisposableBean接口**
+配置： 
+
+	<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
+源代码：
+
+	public class AnotherExampleBean implements DisposableBean {
+		public void destroy() {
+			// do some destruction work (like releasing pooled connections)
+		}
+	}
+
+对于XML-based的配置，使用destroy-method属性来指定方法名称
+对于Java config，使用@Bean的destroyMethod属性指定
+
+### 6.1.3 设置默认的初始化回调和销毁回调
+
+通过在beans中设置默认的方法名称，这样就无须在所有的bean定义中指定
+
+	<beans default-init-method="init">
+		<bean id="blogService" class="com.foo.DefaultBlogService">
+			<property name="blogDao" ref="blogDao" />
+		</bean>
+	</beans>
+default-init-method 是顶层`<beans/>`元素上的一个属性，如果一个bean存在一个这样的方法，
+那么当bean被创建时，就会在相应的时间调用这个bean的init方法。
+当然，可以通过前面的两个属性在bean上重新定义这两个回调方法的名称。
+
+### 6.1.4 组合生命周期机制
+
+Spring有三种方式来控制bean的生命周期中的行为。
+1. InitializingBean和DisposableBean回调接口
+2. 自定义 init()和destroy()方法
+3. @PostConstruct和@PreDestroy注解
+
+当这三种方式同时对初始化回调进行设置时，如果这三种方式指定的是同一个方法，那么这个方法只会执行一次。
+
+如果配置了不同的初始化回调方法，会按照如下顺序执行：
+* @PostConstruct注解的方法
+* 实现InitializngBean接口的afterPropertiesSet()方法
+* 自定义的init()方法
+
+如果配置了不同的销毁回调方法，会按照如下顺序执行：
+
+* @PreDestroy注解的方法
+* 实现DisposableBean接口的destroy()方法
+* 自定义的destroy()方法
+
+
+### 6.1.6 Startup and shutdowncallbacks
+
+## 6.2 ApplicationContextAware and BeanNameAware
+
+## 6.3 Other Aware interfaces
+
 
 #7. Bean definition 继承
 
+通过使用继承，可以重用一些Bean definition,并且可以将某些Bean definition当作模板使用，
+这样减少了很多的输入。
+
+如果你使用编程方式来与ApplicationContext接口，进行交互，ChildBeanDefinition代表子bean definitions。  
+
+大部分用户通常使用configuring bean definitions声明，这个connfiguring bean definitons通过  
+ClassPathXmlApplicationContext内部使用。
+
+**XML-based：**
+使用parent属性来设置parent bean。
+
+	<bean id="inheritedTestBean" abstract="true"
+			class="org.springframework.beans.TestBean">
+		<property name="name" value="parent"/>
+		<property name="age" value="1"/>
+	</bean>
+	<bean id="inheritsWithDifferentClass"
+			class="org.springframework.beans.DerivedTestBean"
+			parent="inheritedTestBean" init-method="initialize">
+		<property name="name" value="override"/>
+		<!-- the age property value of 1 will be inherited from parent -->
+	</bean>
+一个子bean definition可以继承父bean definition中继承 scope、constructor arugment values,  
+property values、method overrides，同时也可以设置新的值。
+任何scope、initialization method、destroy method、static factory method 设置，都可以子bean中，进行  
+覆盖重写。
+
+余下的设置，总是从子definition中获取：depends on，autowire mode，dependency check，singleton,lazy init。
+
+如果要将一个bean设置为bean definitions模块，只需要将abstract设置为true即可，这个bean并不指定任何一个类，只是用来当模块使用。
+比如：
+
+	<bean id="inheritedTestBeanWithoutClass" abstract="true">
+		<property name="name" value="parent"/>
+		<property name="age" value="1"/>
+	</bean>
+	<bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
+			parent="inheritedTestBeanWithoutClass" init-method="initialize">
+		<property name="name" value="override"/>
+		<!-- age will inherit the value of 1 from the parent bean definition-->
+	</bean>
+
+
+
 #8. 容器扩展点
+## 8.1使用一个BeanPostProcessor来自定义 beans
+## 8.2 使用一个BeanFactoryPostProcessor来自定义configuration metadata
+## 8.3 使用一个FactoryBean自定义实例初始化逻辑
 
 #9. Annotation-based container configuration
 
