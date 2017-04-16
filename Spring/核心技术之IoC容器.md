@@ -1298,7 +1298,7 @@ Spring components也会提供bean definition metadata给容器。
 		}
 	}
 
-## 10.6 自动发现的components(autodetected components)的命名
+## 10.6 命名自动发现的components(autodetected components)
 
 
 
@@ -1306,14 +1306,206 @@ Spring components也会提供bean definition metadata给容器。
 
 
 
+#11. Java-based container configuration
+
+基本概念：@Bean和@Configuration
+
+@Bean用来修饰方法，这个方法被此注解修饰后，用来配置和实例化一个新的Spring IoC container管理的对象。
+等同XML configuration中的`<beans/>`中的`<bean/>`元素。
+
+@Configuration用来修饰类，以此来声明，这是一个用作声明bean definitons的源代码 。
+
+如：
+
+	@Configuration
+	public class AppConfig {
+		@Bean
+		public MyService myService() {
+			return new MyServiceImpl();
+		}
+	}
+
+对应的XML：
+
+<beans>
+<bean id="myService" class="com.acme.services.MyServiceImpl"/>
+</beans>
+
+*注：*
+>建议只在@Configuration中的类来使用@Bean，如果在@Component中的类使用，会产生 'lite' mode
+
+
+## 11.1 使用AnnotationConfigApplicationContext来实例化Spring container
+
+这不仅可以接受@Configuration当作输入，也支持普通的@Component等修饰的类。
+
+### 11.1.1 简单结构
+
+就像Spring XML files被用于实例化一个ClassPathXmlApplicationContext，
+@Configuration注解的类被用来实例化一个AnnotationConfigApplicationContext。
+这能实现容器完全不需要XML文件来配置。
+如：
+
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+		MyService myService = ctx.getBean(MyService.class);
+		myService.doStuff();
+	}
+
+如上所述，AnnotationConfigApplicationContext不只可以协同@Configuration修饰的类工作，还可以支持@Compoent等修饰的类。允许这些类当作构造函数的参数。
+
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MyServiceImpl.class,
+			Dependency1.class,Dependency2.class);
+		MyService myService = ctx.getBean(MyService.class);
+		myService.doStuff();
+	}
 
 
 
+### 11.1.2 使用编程的方式来注册
+AnnotationConfigApplicationContext使用一个无参数构造函数，后面使用register()方法来注解。
 
-#12. Java-based container configuration
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(AppConfig.class, OtherConfig.class);
+		ctx.register(AdditionalConfig.class);
+		ctx.refresh();
+		MyService myService = ctx.getBean(MyService.class);
+		myService.doStuff();
+	}
+
+
+### 11.1.3 启用组件扫描(component scanning)
+
+	@Configuration
+	@ComponentScan(basePackages = "com.acme")
+	public class AppConfig {
+		...
+	}
+等同于：
+
+	<beans>
+		<context:component-scan base-package="com.acme"/>
+	</beans>
+
+使用了以上方式 ，容器会在com.acme中查找任何@Component 注解的类。
+
+也可以使用编程的方式来实现：
+
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.scan("com.acme");
+		ctx.refresh();
+		MyService myService = ctx.getBean(MyService.class);
+	}
+
+*注：*
+> @Configuration也是使用了@Component的元注解，所以也会被组件扫描发现并处理。
+
+
+### 11.1.4 使用 AnnotationConfigWebApplicationContext 支持web applictions
+一个AnnotationConfigApplicationContext的WebApplicationContext的变体可以来完成这个工作，它就是AnnotationConfigWebApplicationContext。
+
+这个现实可以在以下情况当中使用，配置Spring ContextLoaderListener，Spring MVC DispatcherServlet，等。
+
+下面这个例子，是一个经典的Spring MVC web application的web.xml配置。
+
+主要关注contextClass context-param和init-param的使用。
+
+	<web-app>
+		<!-- Configure ContextLoaderListener to use AnnotationConfigWebApplicationContext
+		instead of the default XmlWebApplicationContext -->
+		<context-param>
+			<param-name>contextClass</param-name>
+			<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+			</param-value>
+		</context-param>
+
+		<!-- Configuration locations must consist of one or more comma- or space-delimited
+		fully-qualified @Configuration classes. Fully-qualified packages may also be
+		specified for component-scanning -->
+		<context-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>com.acme.AppConfig</param-value>
+		</context-param>
+
+		<!-- Bootstrap the root application context as usual using ContextLoaderListener -->
+		<listener>
+			<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+		</listener>
+
+		<!-- Declare a Spring MVC DispatcherServlet as usual -->
+		<servlet>
+			<servlet-name>dispatcher</servlet-name>
+			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+			<!-- Configure DispatcherServlet to use AnnotationConfigWebApplicationContext
+			instead of the default XmlWebApplicationContext -->
+			<init-param>
+				<param-name>contextClass</param-name>
+				<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+				</param-value>
+			</init-param>
+			<!-- Again, config locations must consist of one or more comma- or space-delimited
+			and fully-qualified @Configuration classes -->
+			<init-param>
+				<param-name>contextConfigLocation</param-name>
+				<param-value>com.acme.web.MvcConfig</param-value>
+			</init-param>
+		</servlet>
+
+		<!-- map all requests for /app/* to the dispatcher servlet -->
+		<servlet-mapping>
+			<servlet-name>dispatcher</servlet-name>
+			<url-pattern>/app/*</url-pattern>
+		</servlet-mapping>
+	</web-app>
+
+### 11.2 @Bean的使用
+
+@Bean是一个方法级别上的注解，直接等同于XML`<bean/>`元素。
+这个注解，支持一些`<bean/>`提供的属性，比如 init-method , destroy-method , autowiring和name。
+
+@Bean可以使用在@Configuration注解或者是@Component注解的类当中。
+
+**TODO：待细化补充**
+
+
+### 11.3 @Configuration的使用
+
+@Configuration是一个类级别上的注解，用来表示一个对象是bean definitions的源代码。
+@Configuration类使用public和@Bean修饰的方法来定义beans。
+
+**TODO：待细化补充**
+
+### 11.4 组合Java-based configurations
+
+组合多个bean definitions 源代码。
 
 # 13. 环境抽象
 
+Enviroment是容器中集成的一个的抽象，这个抽象代表了应用程序环境中两个关键的方面：
+1. 配置(profiles)
+	当指定的profile被激活时，它就是一个容器中注册的bean defintions中具有名称的逻辑分组。
+	Beans都会被分配到一个profile中，无论是XML中定义的，还是使用注解定义的。	
+
+	Enviroment中关于profiles的对象的扮演的角色功能是，决定当前激活哪个profiles，以及哪些profiles  
+	默认就被激活。
+2. 属性(properties)
+	Properties在大多数应用程序中扮演了一个重要的角色，这些properties可能源于：
+	properties files,JVM system properties, system enviroment variables,JNDI,
+	servlet context parameters,ad-hoc,MapS等。
+	Enviroment中关于properties的对象的扮演的角色功能是，提供一个方便的服务接口来操作这些property(配置和获取)。
+
+**TODO:待后续完成**
+
+
+
+
 #14. BeanFactory
 
-# 15.ApplicationContext 额外的能力
+**TODO:待后续完成**
+
+# 15. ApplicationContext 额外的能力
+
+**TODO:待后续完成**
