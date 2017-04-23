@@ -1,6 +1,6 @@
-* [介绍](#Introduction)
 
-<h1 id="Introduction">1.介绍</h1>
+
+
 # 1.介绍
 
 Java的标准java.net.URL类及一些标准的处理器（支持一些URL前缀），无法胜任所有访问低级资源的工作。
