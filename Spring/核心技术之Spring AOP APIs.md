@@ -50,11 +50,11 @@ AOP技术恰恰相反，它利用一种称为"横切"的技术，剖解开封装
 
 
 
-# Spring 中的AOP
+# 1.Spring 中的AOP
 下面是Spring如何来处理横切关注点的。
-# Pointcut API in Spring（Spring中的切点API）
+# 2.Pointcut API in Spring（Spring中的切点API）
 
-## 概念
+## 2.1 概念
 
 Spring的切点模型使得切点可以独立于通知类型进行重用，这就使得针对不同的advice使用相同的pointcut成为可能。
 
@@ -68,6 +68,167 @@ public interface Pointcut {
 }
 ```
 
+将Pointcut分成两部分，方法和类的匹配的重用和组合操作（比如与其它方法匹配器的并集）。
+
+ClassFilter接口用来约束切点只能应用于一系列的目标类。
+如果matches()接口返回true，所以目标类都会被匹配到。
+
+```
+public interface ClassFilter{
+
+	boolean matches(Class clazz);
+}
+```
+
+MethodMatcher接口更加重要。
+
+```
+public interface MethodMatcher{
+
+	boolean matches(Method m, Class targetClass);
+
+	boolean isRuntime();
+
+	boolean matches(Method m, Class targetClass, Object[] args);
+}
+```
+
+ matches(Method, Class)方法用于检测这个切点是否匹配目标类上的某个方法。
+当一个AOP proxy被创建后，可以避免在每一个方法调用上来执行这个检测。
+如果在指定的方法上上，这个具有2个参数的matches()返回了true，并isRuntime()方法也返回了true，那么具有3个参数的matches()将会在每个方法调用时被调用。
+
+这可以让一个切点在目标上的通知(advice)被执行前，检测传递给这个方法调用的参数。
+
+大部分MethodMatchers都是静态，这也意味着它们的isRuntime()方法返回false.
+在这种情况下，具有3个参数的matches()永远都不会被调用。
+
+## 2.2 Operations on pointcuts(切点上的操作)
+
+Spring支持在切点上执行这两种操作：union和intersection
+
+* union（条件或）
+	任意一个切点上匹配的方法（这个方法只要满足其中一个匹配原则就可）
+* intersection(条件与)
+	在所有切点上都匹配的方法（这个方法需要满足所有的匹配原则）
+
+
+切点可以通过使用org.springframework.aop.support.Pointcuts类或org.springframework.aop.support.ComposablePointcut类中的静态方法来完成组合操作。
+
+但是，使用AspectJ pointcut expressions更加简单方便。
+
+## 2.3 AspectJ expression pointcuts
+
+从Spring 2.0开始，Spring使用的最重要的切点类型就是：org.springframework.aop.aspectj.AspectJExpressionPointcut。  
+
+这是切点，使用AspectJ提供的类库，来解析AspectJ pointcut expression字符串。
+
+
+## 2.4 Convenience pointcut implementations（简便的pointcut实现）
+
+Spring提供很多简便的pointcut实现，一些开箱即用，一些在特定应用中当作基类使用。
+
+### 2.4.1 Static pointcuts
+
+静态切点全都是基于方法和目标类，不考虑方法的参数。
+
+静态切点大多数都是高效、最好的选择。
+在Spring中，静态切点的检测只有当一个方法被一次调用时会执行，后面其它所有方法的调用，不再需要检测这个切点。
+
+#### 2.4.1.1 Regular expression pointcuts
+
+一个常用的指定静态切点的方式就是使用正则表达式。
+包括Spring框架以外的AOP 框架都能做到这些。
+
+org.springframework.aop.support.JdkRegexpMethodPointcut是一个普通的正则表达式切点，使用JDK1.4+支持的正则表达式。
+
+使用JdkRegexpMethodPointcut类，你可以提供匹配字符串的一个列表，如果这当中有任何一个  
+匹配，这个切点就会返回true。（相当于union）
+```
+<bean id="settersAndAbsquatulatePointcut"
+		class="org.springframework.aop.support.JdkRegexpMethodPointcut">
+	<property name="patterns">
+		<list>
+			<value>.*set.*</value>
+			<value>.*absquatulate</value>
+		</list>
+	</property>
+</bean>
+```
+
+Spring提供了一个RegexpMethodPointcutAdvisor类，使用这个类可以引用一个Advice。
+注： an Advice can be an interceptor, before advice,
+throws advice etc.
+
+在这个技术的背后，Spring使用的是一个JdkRegexpMethodPointcut。
+
+使用RegexpMethodPointcutAdvisor简化装配，比如下面这个bean，同时封装pointcut和advice。
+```
+<bean id="settersAndAbsquatulateAdvisor"
+		class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+
+	<property name="advice">
+			<ref bean="beanNameOfAopAllianceInterceptor"/>
+	</property>
+
+	<property name="patterns">
+		<list>
+			<value>.*set.*</value>
+			<value>.*absquatulate</value>
+		</list>
+	</property>
+</bean>
+```
+
+RegexpMethodPointcutAdvisor可以应用于任何一种Advice type。
 
 
 
+#### 2.4.1.2 Attribute-driven pointcuts
+一个重要的静态切点的类型是metadat-driven pointcut。
+它使用元数据属性的值，一般是源码级别上的元数据。
+
+### 2.4.2  Dynamic pointcuts
+
+动态切点相比静态切点，在执行时要消耗更多的资源。它们同时考虑方法参数和静态信息。
+这意味着它们在每个方法调用时都被执行。导致的结果就是，不能被缓存，因为参数是变化的。
+最主要的例子就是control flow切点
+
+#### 2.4.2.1 Control flow pointcuts
+
+Spring control flow切点在概念上与AspectJ cflow切点类似，尽管不如后者强大。
+
+一个控制流切点，匹配当前调用栈。  
+比如，如果连接点被com.mycompany.web包中的一个方法或者SomeCaller类调用，就会触发这个切点。
+
+使用org.springframework.aop.support.ControlFlowPointcut来指定控制流切点。
+
+
+## 2.5 Pointcut superclasses
+
+Spring提供了很多有用的切点基类来帮助实现你自己的切点。  
+
+因为静态切点是最有用的，你可以会像如下方式来继承StaticMethodMatcherPointcut。
+这只需要实现一个抽象方法（虽然也可以覆盖其它方法来自定义其它行为）
+```
+class TestStaticPointcut extends StaticMethodMatcherPointcut {
+
+	public boolean matches(Method m, Class targetClass) {
+
+		// return true if custom criteria match
+
+	}
+}
+```
+同样的也是动态切点基类。
+
+## 2.6 自定义切点
+
+因为在Spring AOP中的切点都是Java类，而不是语言特性（比如AspectJ中的切点）。
+所以无论是静态还是动态，都可以定义自定义的切点。推荐使用AspectJ pointcut expression language。
+
+
+
+# 3. Advice API in Spring
+
+
+## 3.1 Advice lifecycles
