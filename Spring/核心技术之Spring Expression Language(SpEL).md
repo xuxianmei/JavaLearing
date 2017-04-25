@@ -174,4 +174,253 @@ java.lang.reflect.Constructor的实例，以此来提升性能。
 
 使用setRootObject()指定表达式的根对象或传递根对象到构造函数，这都在StandardEvaluationContext完成。
 
-同时，也可以使用setVariable()来指定变量，使用
+同时，也可以使用setVariable()来指定变量，使用registerFunction()来指定方法。
+
+StandardEvaluationContext同时也是注册自定义的ConstructorResolvers,MethodResolvers 
+和PropertyAccessors来扩展SpPL如何计算表达式的点。
+
+### 3.1.1 Type Conversion
+
+默认SpEL使用Spring core(org.springframework.core.convert.ConversionService)中的类型转换服务.
+
+这个转换服务，自带很多普通类型的转换器，同时也支持扩展，通过扩展可以添加类型之间的自定义转换。
+此外，还能感知泛型。这意味着，当在表达式中与泛型类型工作时，SpEL将会把它遇到的对象转换维持为正确的类型。
+
+
+比如，当使用setValue()来设置一个List属性。属性的实际类型是List<Boolean>，SpEL知道
+将其填充到列表前，需要将其转换为Boolean类型。
+
+比如 ：
+
+````
+class Simple {
+	public List<Boolean> booleanList = new ArrayList<Boolean>();
+}
+
+Simple simple = new Simple();
+
+simple.booleanList.add(true);
+
+StandardEvaluationContext simpleContext = new StandardEvaluationContext(simple);
+
+
+// false is passed in here as a string. SpEL and the conversion service will
+// correctly recognize that it needs to be a Boolean and convert it
+parser.parseExpression("booleanList[0]").setValue(simpleContext, "false");
+
+// b will be false
+Boolean b = simple.booleanList.get(0);
+
+````
+
+## 3.2 Parser configuration
+
+可以使用一个解析配置对象(org.springframework.expression.spel.SpelParserConfiguration)来配置SpEL表达式解析器。
+
+这个配置对象控制一些表达式组件的行为。
+比如，如果索引到一个数组或一个colleciton，在这个索引上的元素为null时，自动创建这个元素。
+
+当使用一个由属性引用链时，这会特别有用。如果索引到一个array或list，并且这个索引超越了  
+size大小，可以自动增长这个array或list来适应这个索引。
+如：
+````
+class Demo {
+	public List<String> list;
+}
+
+// Turn on:
+// - auto null reference initialization
+// - auto collection growing
+SpelParserConfiguration config = new SpelParserConfiguration(true,true);
+
+ExpressionParser parser = new SpelExpressionParser(config);
+
+Expression expression = parser.parseExpression("list[3]");
+
+Demo demo = new Demo();
+
+Object o = expression.getValue(demo);
+
+// demo.list will now be a real collection of 4 entries
+// Each entry is a new empty String
+
+````
+## 3.3 SpEL compilation
+
+Spring Framework 4.1提供了一个基本表达式编译器。
+表达通常都是解释执行的，这样提供了很多的动态灵活性，但没有提供最好的性能。
+对于偶尔的表达式使用是很好的，但是如果被其它组件比如Spring Intergration使用时，性能会  
+相当重要，动态性没有多大的需要。
+
+这个新的SpEL表达式就是来解决性能问题的。
+这个编译器会将注入代表表达式行为的运算生成一个真正的Java类，并使用它来实现更快的表达式计算。
+
+在执行编译时，因为缺少表达式相关的类型信息，所以编译器使用表达式解释执行计算时收集到的信息。
+
+当首次解释执行计算时，这会找出这个类型是什么。
+当然，如果表达式中的众多元素的类型随着时间而改变，基于这些信息的编译，会引起一些麻烦。
+出于这个原因，所以最适合编译的表达式，是那些类型信息不会随着重复计算时类型信息发生改变的。
+
+比如：
+
+### 3.3.1 Compiler configuration
+
+默认时，编译器是关闭状态的，有两种方式可以将其打开。
+使用上面讲到的解析配置器，或者当SpEL被嵌入到其它组件中使用时，通过系统属性设置
+
+编译器可以在一些模式下运行，枚举（org.springframework.expression.spel.SpelCompilerMode）。
+
+* OFF 关闭模式，也是默认模式
+* IMMEDIATE 立即模式，表达式会尽可能快的编译，如果编译表达式失败，会抛出异常
+* MIXED 混合模式
+
+当选择了一个模式后，就可以使用SpelParserConfiguration来配置解析器
+
+````
+SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,this.getClass().getClassLoader());
+
+SpelExpressionParser parser = new SpelExpressionParser(config);
+
+Expression expr = parser.parseExpression("payload");
+
+MyMessage message = new MyMessage();
+
+Object payload = expr.getValue(message);
+````
+
+
+
+### 3.3.2 Compiler limitations
+
+目前，仍然一些表达式不能被编译
+
+
+* expressions involving assignment
+* expressions relying on the conversion service
+* expressions using custom resolvers or accessors
+* expressions using selection or projection
+
+More and more types of expression will be compilable in the future.
+
+# 4.Expression support for defining bean definitios
+
+SpEL表达式可以用于定义BeanDefinitions的XML-based和annotation-based配置元数据。
+
+在这两种情况，定义表达式的语法都是 
+``#{ <expression
+string> }``
+
+## 4.1 XML-based configuration
+
+* 设置构造参数函数
+
+```
+<bean id="numberGuess" class="org.spring.samples.NumberGuess">
+	<property name="randomNumber" value="#{ T(java.lang.Math).random() * 100.0 }"/>
+	<!-- other properties -->
+</bean>
+```
+
+* 使用预定义的变量
+systemProperties是已经定义好的变量。
+
+```
+<bean id="taxCalculator" class="org.spring.samples.TaxCalculator">
+	<property name="defaultLocale" value="#{ systemProperties['user.region'] }"/>
+	<!-- other properties -->
+</bean>
+```
+
+* 通过名称使用其它bean的属性
+
+
+```
+<bean id="numberGuess" class="org.spring.samples.NumberGuess">
+	<property name="randomNumber" value="#{ T(java.lang.Math).random() * 100.0 }"/>
+	<!-- other properties -->
+</bean>
+
+<bean id="shapeGuess" class="org.spring.samples.ShapeGuess">
+	<property name="initialShapeSeed" value="#{ numberGuess.randomNumber }"/>
+	<!-- other properties -->
+</bean>
+```
+
+## 4.2 Annotation-based configuration
+
+@Value注解可以放置在字段、方法和方法参数/构造器参数上来指定一个默认值。
+
+* 设置字段变量的值
+
+
+```
+public static class FieldValueTestBean{
+
+	@Value("#{ systemProperties['user.region'] }")
+	private String defaultLocale;
+
+	public void setDefaultLocale(String defaultLocale) {
+
+		this.defaultLocale = defaultLocale;
+	}
+
+	public String getDefaultLocale() {
+
+		return this.defaultLocale;
+	}
+}
+```
+
+* 设置属性setter方法参数默认值
+
+```
+public static class PropertyValueTestBean {
+
+	private String defaultLocale;
+	@Value("#{ systemProperties['user.region'] }")
+
+	public void setDefaultLocale(String defaultLocale) {
+		this.defaultLocale = defaultLocale;
+	}
+
+	public String getDefaultLocale() {
+		return this.defaultLocale;
+	}
+}
+
+```
+
+* 自动装配的方法和构造器也可以使用@Value
+
+```
+public class SimpleMovieLister {
+
+	private MovieFinder movieFinder;
+	private String defaultLocale;
+
+	@Autowired
+	public void configure(MovieFinder movieFinder,@Value("#{ systemProperties['user.region'] }") String defaultLocale){
+		this.movieFinder = movieFinder;
+		this.defaultLocale = defaultLocale;
+	}
+	// ...
+}
+```
+
+```
+public class MovieRecommender {
+
+	private String defaultLocale;
+	private CustomerPreferenceDao customerPreferenceDao;
+
+	@Autowired
+	public MovieRecommender(CustomerPreferenceDao customerPreferenceDao,@Value("#{systemProperties['user.country']}") String defaultLocale) {
+		this.customerPreferenceDao = customerPreferenceDao;
+		this.defaultLocale = defaultLocale;
+	}
+	// ...
+}
+
+```
+
+# 语言参考
