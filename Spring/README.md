@@ -6,8 +6,8 @@
 * 核心技术	
 	* [核心技术之IoC容器](核心技术之IoC container.md)
 	* [核心技术之Resources](核心技术之Resources.md)
-	* [核心技术之Validation，Data Binding and Type Conversion ](核心技术之Validation,Data Binding,Type Conversion)
-	* 
+	* [核心技术之Validation，Data Binding and Type Conversion ](核心技术之Validation,Data Binding,Type Conversion.md)
+	* [核心技术之Spring Expression Language\(SpEL\)](核心技术之Spring Expression Language\(SpEL\).md)
 
 
 * 测试
