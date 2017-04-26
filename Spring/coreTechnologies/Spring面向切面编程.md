@@ -1,5 +1,5 @@
 
-# 介绍
+# 1.介绍
 Aspect-Oriented Programming(AOP)通过提供思考编程结构的另一种方式,  
 补足和完善了面向对象编程(Object-Oriented Programming)。
 
@@ -21,3 +21,98 @@ AOP完善Spring来提供一个更有能力的中间件解决方案。
 AOP在Spring Framework中被用来
 * 提供声明式事务服务，最重要的服务是声明式事务管理。
 * 允许用户实现自定义切面，使用AOP来完善OOP。
+
+# 1.1 AOP概念
+
+这里主要介绍一些AOP的概念和术语。
+
+* 切面(Aspect)：横切多个类的关注模块。事务管理是Java企业应用程序中一个横切关注的好例子。在Spring AOP中，切面通过使用正常的类（schema-based approach）或者使用@Aspect注解  
+修饰的类（@Aspect style）
+
+* 连接点(Join point)：程序执行过程中的一个点，比如方法的执行或异常的处理。
+在Spring AOP中，连接点始终代表一个方法的执行。
+
+* 通知（Advice）：切面在一个实际的连接点执行的操作。包含三种不同类型的通知：  
+“around","before","after"。包括Spring在内的许多AOP框架，将通知当作拦截器，维护着  
+连接点上的拦截器链。
+
+* 切点(Pointcut）：用来匹配连接点的谓语。通知与切点表达式结合，在根据切点匹配的连接点上运行（比如，一个指定名称的方法的执行）。基于切点表达式匹配的连接点的概念是AOP的中心，Spring默认使用AspectJ切点表达式。
+* 引入（Introduction）：声明附加的方法和字段来增强一个类型。Spring AOP允许你引入新的  
+接口（及相应的实现）到任何被通知的对象上。比如，你可以使用引入来创建一个bean实现IsModified接口，简化缓存。
+
+* 目标对象(Target object)：对象可以被一个或多个切面通知。也可以称为advised object，因为  
+Spring AOP是使用运行时proxies实现的，所以这个对象永远是一个proxied object
+
+* AOP proxy：一个为了实现切点联系，而被AOP框架创建的对象。在Spring Framework，AOP proxy 可以是一个JDK dynamic proxy或CGLIB proxy。
+
+* 织入（Weaving）：连接萧山与其它应用程序类型或对象来创建一个 advised object。
+这可以在编译时（比如使用AspectJ compiler）、加载时、运行时完成。
+Spring AOP和其它纯净的Java AOP 框架一样，在运行时执行织入。
+
+**通知类型**
+
+* Before advice
+在连接点之前执行，除非抛出异常。
+* After returning advice
+在连接点正常结束时执行，比如一个方法没有抛出异常的正常返回。
+* After throwing advice
+在一个方法抛出异常时执行。
+* After(finally) advice
+无论连接点返回是正常返回，还是异常抛出结束，都会执行。
+* Around advice
+这个advice就像是一个方法调用器。这是最有力的advie类型。
+Around advice能够做到自定义在方法调用前和调用后的行为。
+它也负责选择是否执行正常结束，还是抛出异常来提前结束。
+
+推荐在使用advice时，使用满足需求的最小advice(恰好能做这件事，而不是什么样的需求都提供功能最强的Around advice)。
+
+在Spring 2.0中，所有的通知参数都是静态类型，所以使用的参数都是相应适合的参数（比如方法调用的返回值类型），而不是Object arrays。
+
+AOP区分其它只提供拦截器的老技术的关键点就是，使用切点匹配连接点概念。
+
+切点使得advice能够独立于面向对象机制。
+
+比如，一个提供声明式事务管理的aound advice，能够应用到跨越多个对象的一系列方法上。
+（比如服务层上的所有业务操作。）
+
+## 1.2 Spring AOP的功能和目标
+
+Spring AOP是使用纯粹的Java实现的。不需要额外的编译过程。
+Spring AOP不需要控制类加载机制，所以也适用于Servlet container或application server中。
+
+Spring AOP目前只支持方法执行连接点（通知Spring beans上的方法执行）。
+字段的拦截没有实现，如果要使用这类似的功能，考虑AspectJ语言。
+
+Spring AOP与大多数AOP框架的区别在于，它的目录不是提供最完整的AOP实现，
+而是在AOP实现和Spring IoC中提供一个紧密的集成，以此来帮助解决企业应用程序中的觉问题。
+
+所以， Spring Framework’s AOP的功能通常都是和Spring IoC container一起联合使用。
+
+切面通过使用普通的bean definition语言来配置（尽管也提供了autoproxying功能）：  
+这是一个区别其它AOP实现的重要不同点。
+
+Spring AOP主要是为企业Java应用程序中的大多数问题提供AOP负责的优秀的解决方案。
+
+Spring AOP永远不会发展成像AspectJ那样的复杂的AOP解决方案。
+
+Spring AOP和AspectJ,这两个proxy-based构架，都是有价值的，也是互补的。
+
+Spring可以无缝地让Spring AOP和IoC与AspectJ集成。
+
+ 
+
+## 1.3 AOP Proxies
+
+Spring AOP默认为AOP proxyes使用标准的JDK dynamic proxies，这让任何接口都可以被代理。
+Spring AOP也可以使用CGLIB proxies,这种情况下代理类是必须的，而不是接口。
+
+
+## 2. @AspectJ support
+
+
+
+## 3. Schema-based AOP support
+
+
+
+
