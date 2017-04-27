@@ -233,10 +233,28 @@ differentiates between the proxy object itself (bound to this) and the target ob
 
 注：
 >因为Spring AOP framework的proxy-based性质，所以任何切点只会针对public方法来匹配。
->如果要使用protected/private的方法，甚至构造函数，可以考虑使用Spring-driven native AspectJ weaving 来替代Spring’s proxy-based AOP framework。
+>如果要使用protected/private的方法，甚至构造函数，可以考虑使用Spring-driven native >AspectJ weaving 来替代Spring’s proxy-based AOP framework。
 
 
-Spring AOP还支持一个额外的名为bean的PCD。这个PCD
+Spring AOP还支持一个额外的名为bean的PCD。这个PCD允许你限定连接点到一个特定名称的Spring bean，或者特定名称的Spring beans的集合（当使用通配符时）。
+```
+bean(idOrNameOfBean)
+```
+idOrNameOfBean可以是任何Spring bean的名称：支持 *，所以如果你为Spring beans建立了一些命名规范，你可以轻松的编写一个bean PCD来选出它们。
+与其它pointcut designators一样，支持`&&`, `||`, `!`等.
+
+注：
+> bean PCD仅在Spring AOP中支持，在原生的AspectJ weaving中不支持。
+> 所以在@Aspect中不可用。
+> The bean PCD operates at the instance level (building on the Spring bean >name concept) rather
+>than at the type level only (which is what weaving-based AOP is limited to). >Instance-based
+>pointcut designators are a special capability of Spring’s proxy-based AOP >framework and its close
+>integration with the Spring bean factory, where it is natural and >straightforward to identify specific
+>beans by name.
+
+
+
+
 ## 3. Schema-based AOP support
 
 
