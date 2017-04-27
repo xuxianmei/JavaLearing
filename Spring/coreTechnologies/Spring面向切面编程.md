@@ -26,7 +26,7 @@ AOP在Spring Framework中被用来
 
 这里主要介绍一些AOP的概念和术语。
 
-* 切面(Aspect)：横切多个类的关注模块。事务管理是Java企业应用程序中一个横切关注的好例子。在Spring AOP中，切面通过使用正常的类（schema-based approach）或者使用@Aspect注解  
+* 切面(Aspect)：横切多个类的关注模块（横切关注点）。事务管理是Java企业应用程序中一个横切关注的好例子。在Spring AOP中，切面通过使用正常的类（schema-based approach）或者使用@Aspect注解  
 修饰的类（@Aspect style）
 
 * 连接点(Join point)：程序执行过程中的一个点，比如方法的执行或异常的处理。
@@ -108,9 +108,135 @@ Spring AOP也可以使用CGLIB proxies,这种情况下代理类是必须的，�
 
 
 ## 2. @AspectJ support
+@AspectJ指声明切面成为被注解修饰的普通类的风格。
+@Aspect风格在AspectJ project的 AspectJ5 release版本中引入。
+
+Spring使用AspectJ为解析和匹配提供的类库，以Aspect 5一样来解释同样的注解。
+
+## 2.1 启用@AspectJ支持
+
+为了在Spring configuration中使用@AspectJ切面，你需要启用Spring来支持基于@AspectJ切面的Spring AOP 配置，以及基于bean是否被这些切面通知(advised)的自动代理beans。
+
+自动代理，如果Spring检测一个bean被一个或多个切面通知（advised），它就会为那个bean自动生成一个代表来拦截方法的调用和确保这些通知按需执行。
+
+可以通过XML风格和Java风格的配置来开启@AspectJ 支持。
+无论使用哪种风格，都需要使用到AspectJ的aspectjweaver.jar类库。
+
+### 2.1.1使用Java配置启用@AspectJ支持
+
+为了使用Java @Configuration来启用@AspectJ支持，只需要添加@EnableAspectJAutoProxy注解：
+```
+@Configuration
+@EnableAspectJAutoProxy
+public class AppConfig {
+
+}
+```
+### 2.1.2 使用XML配置启用@AspectJ支持
+在XML-based configuration中启用@AspectJ支持：使用aop:aspectj-autoproxy元素
+
+```
+<aop:aspectj-autoproxy/>
+```
+
+## 2.2 声明切面
+启用@AspectJ支持，应用程序环境中定义的任何一个对应@AspectJ 切面类（使用了@Aspect注解的类）的bean，都会被Spring自动检测到，并用来配置Spring AOP。
+下面这个例子，展示一个不太有用的切面的最小定义要求:
+
+使用org.aspectj.lang.annotation.Aspect注解的类定义
+```
+package org.xyz;
+import org.aspectj.lang.annotation.Aspect;
+
+@Aspect
+public class NotVeryUsefulAspect {
+
+}
+```
+应用程序环境中一个常规的bean definition，连接一个使用了@Aspect注解的类：
+```
+<bean id="myAspect" class="org.xyz.NotVeryUsefulAspect">
+	<!-- configure properties of aspect here as normal -->
+</bean>
+```
+
+切面(使用@Aspect注解的类)也会像其它类一样有方法和字段。它们也可以包含切点
+通知和引入声明。
 
 
+## 2.3 定义切点
 
+切点决定感兴趣的连接点，并允许我们使用它来控制通知的执行。Spring AOP只支持Spring beans上的方法调用切点，所以，你可以把切点当作匹配Spring beans上的方法执行、
+
+一个切点声明有两个部分：
+一个由一个名称和任意多个参数组成的签名。
+一个决定具体感兴趣于哪个方法执行的切点表达式。
+
+在AOP的@AspectJ 注解风格中：
+切点签名由常规的方法定义提供
+切点表达式使用@Pointcut注解来声明（担任切点签名的方法，返回值类型必须为void）
+
+下面这个例子，可以帮助区分切点签名和切点表达式:
+定义了一个名为anyOldTransfer的切点，这个切点匹配任何名为transfer的方法的执行。
+```
+@Pointcut("execution(* transfer(..))")// the pointcut expression
+private void anyOldTransfer() {}// the pointcut signature
+```
+
+组成@Pointcut注解的值的切点表达式是一个常规的AspectJ 5的切点表达式。
+更多关于[@AspectJ 语言](http://www.eclipse.org/aspectj/doc/released/progguide/index.html)的知识。
+
+
+### 2.3.1 支持的切点designators（指示器，指示符）
+
+Spring AOP支持如下的AspectJ pointcut designators(PCD)在切点表达式中使用。
+
+* execution
+用于匹配连接点的方法执行。在使用Spring AOP时，这是最主要使用的切点
+* within
+限制匹配在指定的类型中的连接点（当使用Spring AOP时，在匹配的类型中声明的方法的执行）
+* this
+限制匹配为bean的reference(Spring AOP proxy)是指定类型的一个实例的连接点。
+* target
+限制匹配连接点（使用Spring AOP时方法的执行），这个连接点的目标类型对象（被代理的应用程序对象）是指定类型的一个实例。
+* args
+限制匹配连接点，参数是指定类型的实例。
+* @target
+限制匹配连接点，执行对象的类上有一个指定类型的注解
+* @args
+限制匹配连接点，传递的实参的运行时类型有指定类型的注解。
+* @within
+限定匹配连接点，连接点位于使用了指定注解的类型当中。
+* @annotation
+限定匹配连接点，连接点的实际项（在Spring AOP中被执行方法）有指定类型的注解。
+
+>Other pointcut types
+>
+>The full AspectJ pointcut language supports additional pointcut designators >that are not supported
+>in Spring. These are: call, get, set, preinitialization, >staticinitialization,
+>initialization, handler, adviceexecution, withincode, cflow, cflowbelow,
+>if, @this, and @withincode. Use of these pointcut designators in pointcut >expressions
+>interpreted by Spring AOP will result in an IllegalArgumentException being >thrown.
+>
+>The set of pointcut designators supported by Spring AOP may be extended in >future releases to
+>support more of the AspectJ pointcut designators.
+
+因为Spring AOP限制匹配只在方法执行连接点，所以这里讨论的，只是AspectJ中的很小的部分。
+
+ AspectJ itself has type-based semantics and at an execution join point both this and target
+refer to the same object - the object executing the method. 
+
+
+Spring AOP is a proxy-based system and
+differentiates between the proxy object itself (bound to this) and the target object behind the proxy
+(bound to target).
+
+注：
+>因为Spring AOP framework的proxy-based性质，所以任何切点只会针对public方法来匹配。
+>如果要使用protected/private的方法，甚至构造函数，可以考虑使用Spring-driven native AspectJ weaving 来替代Spring’s proxy-based AOP framework。
+
+
+Spring AOP还支持一个额外的名为bean的PCD。这个PCD
 ## 3. Schema-based AOP support
 
 
