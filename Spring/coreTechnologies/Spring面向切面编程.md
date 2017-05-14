@@ -253,6 +253,209 @@ idOrNameOfBean可以是任何Spring bean的名称：支持 *，所以如果你�
 >beans by name.
 
 
+### 2.3.2 合并切点表达式
+
+可以使用`&&`，`||`，`!` 来结合切点表达式，也可以通过名称来引用切点表达式。
+
+下面这个例子，展示了三个切点表达式：
+
+```
+@Pointcut("execution(public * *(..))")
+private void anyPublicOperation() {}
+
+@Pointcut("within(com.xyz.someapp.trading..*)")
+private void inTrading() {}
+
+@Pointcut("anyPublicOperation() && inTrading()")
+private void tradingOperation() {}
+```
+anyPublicOperation：匹配连接点上的任何公共方法的执行
+inTrading：匹配连接点上的com.xyz.someapp.trading包中的方法的执行
+tradingOperation：匹配com.xyz.someapp.trading包中的所有公共方法的执行
+
+这是一个比较好的方式，使用较小的命名的组件来组成更加复杂的切点表达式。
+当通过名称来引用切点时，Java的可访问性规则会起作用。
+
+### 2.3.3 共享常见的切点定义
+
+当使用企业应用程序时，你可能经常会想从一些几个切面中来参考应用程序的模块和特定集合的操作。
+我们推荐定义一个捕获常见切点表达式的`SystemArchitecture`的切面来达到这个目的。
+
+一个典型的这样的切面，可能看起来像这样：
+```
+package com.xyz.someapp;
+
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+
+@Aspect
+public class SystemArchitecture {
+
+	/**
+	* A join point is in the web layer if the method is defined
+	* in a type in the com.xyz.someapp.web package or any sub-package
+	* under that.
+	*/
+	@Pointcut("within(com.xyz.someapp.web..*)")
+	public void inWebLayer() {}
+
+
+	/**
+	* A join point is in the service layer if the method is defined
+	* in a type in the com.xyz.someapp.service package or any sub-package
+	* under that.
+	*/
+	@Pointcut("within(com.xyz.someapp.service..*)")
+	public void inServiceLayer() {}
+
+
+	/**
+	* A join point is in the data access layer if the method is defined
+	* in a type in the com.xyz.someapp.dao package or any sub-package
+	* under that.
+	*/
+	@Pointcut("within(com.xyz.someapp.dao..*)")
+	public void inDataAccessLayer() {}
+
+
+	/**
+	* A business service is the execution of any method defined on a service
+	* interface. This definition assumes that interfaces are placed in the
+	* "service" package, and that implementation types are in sub-packages.
+	*
+	* If you group service interfaces by functional area (for example,
+	* in packages com.xyz.someapp.abc.service and com.xyz.someapp.def.service) then
+	* the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
+	* could be used instead.
+	*
+	* Alternatively, you can write the expression using the 'bean'
+	* PCD, like so "bean(*Service)". (This assumes that you have
+	* named your Spring service beans in a consistent fashion.)
+	*/
+	@Pointcut("execution(* com.xyz.someapp..service.*.*(..))")
+	public void businessService() {}
+
+
+	/**
+	* A data access operation is the execution of any method defined on a
+	* dao interface. This definition assumes that interfaces are placed in the
+	* "dao" package, and that implementation types are in sub-packages.
+	*/
+	@Pointcut("execution(* com.xyz.someapp.dao.*.*(..))")
+	public void dataAccessOperation() {}
+}
+```
+
+在这样的切面中定义的这些切点，可以涉及任何你需要一个切点表达式的地方(  
+The pointcuts defined in such an aspect can be referred to anywhere that you need a pointcut
+expression)。
+
+比如，事务化服务层，可以这样写：
+```
+<aop:config>
+	<aop:advisor
+		pointcut="com.xyz.someapp.SystemArchitecture.businessService()"
+		advice-ref="tx-advice"/>
+</aop:config>
+
+<tx:advice id="tx-advice">
+	<tx:attributes>
+		<tx:method name="*" propagation="REQUIRED"/>
+	</tx:attributes>
+</tx:advice>
+```
+
+### 2.3.4 示例
+
+Spring AOP 使用者，使用的最频繁的切点指定符（pointcut designator）就是execution。
+
+一个execution的表达式格式是：
+```
+execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-pattern(param-pattern)
+throws-pattern?)
+```
+除了返回值类型模式(ret-type-pattern)、名称模式、参数模式是必须的，其它都是可选的。
+
+* returning type pattern
+决定被匹配的连接点，这个连接点的方法返回类型必须是指定的类型，最常使用的就是 * ，指明可以是任何返回值类型。
+
+* name pattern
+匹配的方法名称，可以使用通配符`*`作为name pattern的一部分，或者全部。
+
+* parameters pattern
+稍微有些复杂，
+(..)匹配任何数量的参数（0-n个）
+(*) 一个任何类型的参数
+(*,String)匹配包含两个参数的方法，第一个参数类型不限，第二个参数类型为String。
+
+[更多参考aspectj](http://www.eclipse.org/aspectj/doc/released/progguide/)
+
+
+
+**常见切点表达式**
+
+* 公共方法的执行
+```
+execution(public * *(..))
+```
+
+* 方法名以set开始的方法的执行
+```
+execution(* set*(..))
+```
+
+* 任何AccountService接口中定义的方法的执行
+```
+execution(* com.xyz.service.AccountService.*(..))
+```
+
+* 任何com.xyz.service包中定义的方法的执行
+```
+execution(* com.xyz.service.*.*(..))
+```
+
+* 任何com.xyz.service包及其子包中定义的方法的执行
+```
+execution(* com.xyz.service..*.*(..))
+```
+
+* com.xyz.service包中任何连接点的（在Spring AOP中只有方法的执行）
+```
+within(com.xyz.service.*)
+```
+* com.xyz.service包及其子包中任何连接点（在Spring AOP中只有方法的执行）
+```
+within(com.xyz.service..*)
+```
+* 任何代理实现了AccountService接口的连接点（在Spring AOP中只有方法的执行）
+```
+this(com.xyz.service.AccountService)
+```
+* 任何目标对象实现了AccountService的连接点（在Spring AOP中只有方法的执行）
+```
+target(com.xyz.service.AccountService)
+```
+
+* 只有一个参数，且传递的参数在运行时是Serializable类型的连接点
+```
+args(java.io.Serializable)
+```
+注：execution(* *(java.io.Serializable))代表的是方法签名，声明的参数是Serializable。
+
+* 目标对象有@Transactional注解的连接点
+```
+@target(org.springframework.transaction.annotation.Transactional)
+```
+
+
+
+
+
+
+
+
+
+
 
 
 ## 3. Schema-based AOP support
