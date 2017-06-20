@@ -1,5 +1,5 @@
 
-![architecture](images/linxArchitecture.png)
+![architecture](./images/linxArchitecture.png)
 
 最内层是硬件，最外层是用户常用的应用（比如，浏览器）。
 硬件是物理基础，应用提供服务。
