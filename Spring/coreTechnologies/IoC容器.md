@@ -52,7 +52,7 @@ Beans及它们之间的依赖，体现在配置元数据当中。
 下面这张图，展示了Spring工作时的高级视角。
 
 **The Spring IoC Container**
->![The Spring IoC Container](images/Spring_IoC_Container.png)
+>![The Spring IoC Container](../images/Spring_IoC_Container.png)
 
 
 
