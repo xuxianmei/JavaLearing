@@ -8,7 +8,7 @@ CLI是一个国际标准，由ECMA和ISO进行了标准化，全称为Common Lan
 
 * .Net Framework体系结构
 
-![](../images/Architecture.jpg)
+![](./images/Architecture.jpg)
 
 CLI是一个标准，而.NET Framework是这个标准的具体实现。
 在CLI中，并没有CLR的概念，只有VES，而CLR就是.NET框架中VES的具体实现。
@@ -37,10 +37,10 @@ CLI是一个标准，而.NET Framework是这个标准的具体实现。
 CIL最初是随着.NET由微软一起发布的，因此之前也叫做MSIL（Microsoft Intermediate Language），后来进行了标准化，之后便被称做CIL。CIL也简称为IL。
 
 * 源代码文件编译成CIL的编译过程
-![](../images/CompileToCIL.jpg)
+![](./images/CompileToCIL.jpg)
 
 * 程序运行时CIL编译成本机代码
-![](../images/CompileToMachineCode.jpg)
+![](./images/CompileToMachineCode.jpg)
 
 公共中间语言这个术语到底包含了哪几层含义。
 
@@ -64,7 +64,7 @@ CIL不过是一种程序语言，只不过相对于C#来说，它是一种更低
 顾名思义，其中包含一些基础的类，包含：基本数据类型，文件操作，集合，自定义属性，格式设置，安全属性，I/O流，字符串操作，事件日志等的类型。
 
 * BCL体系图
-![](../images/bcl.jpg)
+![](./images/bcl.jpg)
 下面是BCL是包含的命名空间，每个命名空间中都有一些具体的类。
 
 Namespace|Description
@@ -91,7 +91,7 @@ System.Xml|	Provide classes to work with XML type
 
 框架类库,这些类库基本上都是引用BCL，在这些类库的基础上做的扩充，也是BCL的超集。
 
-![](../images/fcl.jpg)
+![](./images/fcl.jpg)
 
 
 ### CLS——Common Language Specification 公共语言规范
@@ -112,5 +112,5 @@ CLR概念不关系开发人员用哪一种语言写源代码，只要编译器�
 
 * CLR结构图
 
-![](../images/clr.jpg)
+![](./images/clr.jpg)
 
