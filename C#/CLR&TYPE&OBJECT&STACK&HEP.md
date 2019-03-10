@@ -96,7 +96,7 @@ CLR自动将所有局部变量初始化为null或零（类型的默认值）。
 	* 最后，代码在类型对象的方法表中查找引用了被调用方法的记录项，调用其IL
 此处，e引用了一个Manager对象，所以会调用Manager的GenProgressReport实现。
 
-#### System.Type类型的对象实例
+### System.Type类型的对象实例
 
 在Employee和Manager类型对象都包含**类型对象指针**成员。这是由于类型对象本质也是对象。
 CLR创建类型对象时，必须初始化这些成员。
