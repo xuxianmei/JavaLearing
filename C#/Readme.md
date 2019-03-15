@@ -28,8 +28,6 @@
 
 ## [方法与参数]
 
-## 多线程
-
 ## 反射
 
 ## 多线程
@@ -40,9 +38,13 @@
 
 ### [异步函数和状态机](./Thread/AsyncFunction&StateMachine.md)
 
+### [基元线程同步构造](./Thread/PrimitveThreadSync.md)
 
+### [混合线程同步构造](./Thread/HybridThreadSync.md)
 
+### TASK
 
+### async await
 
 
 

@@ -19,13 +19,13 @@
 
 ```
 static async Task<String> GetStrAsync()
+{
+    await Task.Run(() =>
     {
-        await Task.Run(() =>
-        {
-            return "abc";
-        });
-       return "something";
-    }
+        return "abc";
+    });
+   return "something";
+}
 ```
 
 使用编译器，编译上述代码，再反编译成源代码，就可以看到状态机的代码。
@@ -115,3 +115,10 @@ internal class Program
 
 }
 ```
+
+## 异步函数扩展性
+
+
+##FCL中的异步函数
+
+
