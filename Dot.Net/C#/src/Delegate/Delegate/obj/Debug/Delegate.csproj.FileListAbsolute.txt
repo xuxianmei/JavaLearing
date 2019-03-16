@@ -1,0 +1,7 @@
+L:\Learing\C#\src\Delegate\Delegate\bin\Debug\Delegate.exe.config
+L:\Learing\C#\src\Delegate\Delegate\bin\Debug\Delegate.exe
+L:\Learing\C#\src\Delegate\Delegate\bin\Debug\Delegate.pdb
+L:\Learing\C#\src\Delegate\Delegate\obj\Debug\Delegate.csproj.CoreCompileInputs.cache
+L:\Learing\C#\src\Delegate\Delegate\obj\Debug\Delegate.exe
+L:\Learing\C#\src\Delegate\Delegate\obj\Debug\Delegate.pdb
+L:\Learing\C#\src\Delegate\Delegate\obj\Debug\Delegate.csprojAssemblyReference.cache

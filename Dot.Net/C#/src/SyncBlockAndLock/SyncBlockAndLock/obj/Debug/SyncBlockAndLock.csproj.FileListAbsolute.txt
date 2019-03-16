@@ -1,0 +1,7 @@
+L:\Learing\C#\src\SyncBlockAndLock\SyncBlockAndLock\bin\Debug\SyncBlockAndLock.exe.config
+L:\Learing\C#\src\SyncBlockAndLock\SyncBlockAndLock\bin\Debug\SyncBlockAndLock.exe
+L:\Learing\C#\src\SyncBlockAndLock\SyncBlockAndLock\bin\Debug\SyncBlockAndLock.pdb
+L:\Learing\C#\src\SyncBlockAndLock\SyncBlockAndLock\obj\Debug\SyncBlockAndLock.csprojAssemblyReference.cache
+L:\Learing\C#\src\SyncBlockAndLock\SyncBlockAndLock\obj\Debug\SyncBlockAndLock.csproj.CoreCompileInputs.cache
+L:\Learing\C#\src\SyncBlockAndLock\SyncBlockAndLock\obj\Debug\SyncBlockAndLock.exe
+L:\Learing\C#\src\SyncBlockAndLock\SyncBlockAndLock\obj\Debug\SyncBlockAndLock.pdb
