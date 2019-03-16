@@ -1,4 +1,4 @@
-## ASP.NET 运行机制
+# ASP.NET 运行机制
 在CLR初始化的时候会加载两个重要的对象：AppManagerAppDomainFactory和ISAPIRuntime。
 
 通过AppManagerAppDomainFactory的Create方法为Application创建一个Application Domain；
