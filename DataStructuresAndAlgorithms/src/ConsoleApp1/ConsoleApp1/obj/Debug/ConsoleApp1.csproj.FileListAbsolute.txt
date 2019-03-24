@@ -1,0 +1,7 @@
+L:\Learing\DataStructuresAndAlgorithms\src\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.exe.config
+L:\Learing\DataStructuresAndAlgorithms\src\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.exe
+L:\Learing\DataStructuresAndAlgorithms\src\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.pdb
+L:\Learing\DataStructuresAndAlgorithms\src\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.csproj.CoreCompileInputs.cache
+L:\Learing\DataStructuresAndAlgorithms\src\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.exe
+L:\Learing\DataStructuresAndAlgorithms\src\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.pdb
+L:\Learing\DataStructuresAndAlgorithms\src\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.csprojAssemblyReference.cache
