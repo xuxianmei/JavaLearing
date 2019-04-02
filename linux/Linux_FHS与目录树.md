@@ -6,7 +6,7 @@ FHS(英文：Filesystem Hierarchy Standard 中文:文件系统层次结构标准
 
 1. ``/``(root, 根目录)：与开机系统有关
 2. ``/usr``(unix software resource)：与软件安装、执行有关
-3. ```/var``(variable)：与系统动作过程有关
+3. ``/var``(variable)：与系统动作过程有关
 
 
 
