@@ -22,10 +22,10 @@
 
 ## [十一、速查表](quick.md)
 
-## [参考文档]
+## 参考文档
 * [https://github.com/ziishaned/learn-regex](https://github.com/ziishaned/learn-regex)
 * [https://zhuanlan.zhihu.com/p/27653434](https://zhuanlan.zhihu.com/p/27653434)
 
-## [使用工具]
+## 使用工具
 * [可视化工具](https://jex.im/regulex)
 * [测试工具](https://regex101.com)
