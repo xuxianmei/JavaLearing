@@ -20,7 +20,7 @@
 
 ## [十一、表达式效率](efficient.md)
 
-## [十一、速查表](quick.md)
+## [十二、速查表](quick.md)
 
 ## 参考文档
 * [https://github.com/ziishaned/learn-regex](https://github.com/ziishaned/learn-regex)
