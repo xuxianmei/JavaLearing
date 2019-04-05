@@ -7,7 +7,7 @@
 ## [六、Value的5种基本数据结构之有序集合](sort_set.md)
 
 ## [七、Key操作和Key管理](key.md)
-## [八、Key操作和Key管理](database.md)
+## [八、数据库管理](database.md)
 ## [九、小功能，大用处](feature.md)
 ### [功能之慢查询分析](slowquery.md)
 ### [功能之Redis Shell](redisshell.md)
