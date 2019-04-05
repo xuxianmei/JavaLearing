@@ -7,3 +7,4 @@
 ## [Linux](linux/README.md)
 ## [.NET](Dot.Net/Readme.md)
 ## [正则表达式](Regex/README.md)
+## [Redis](Redis/README.md)
