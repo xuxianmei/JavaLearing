@@ -20,18 +20,13 @@ fi
 bash shell的if语句会运行if后面的那个命令。如果该命令的退出状态码是0，  
 位于then部分的命令就会被执行。  
 如果该命令的退出状态码为其他值，then部分的命令就不会被执行。
-fi语句用来表示if-then语句至此结束
-
-
-在then部分，可以执行不此一条命令。
-
+fi语句用来表示if-then语句至此结束。
 
 * if-then-else 
 
 
 ````
-if command 
-then 
+if command ; then 
 	commands
 else
 	commands
@@ -41,11 +36,9 @@ fi
 * if-then-elif-then-fi
 
 ````
-if command
-then
+if command ; then
 	commands
-elif command
-then
+elif command ;then
 	commands
 fi
 ````
@@ -67,13 +60,15 @@ if-then语句不能测试命令退出码之外的条件。
   * 文件比较
 
 
-
-
 * 使用格式
 
 ````
 test condition
 ````
+或者
+```
+[ condition ] #中括号两边有空格
+```
 
 condition是test命令要测试的一系列参数和值。  
 当用在if-then语句中时，test命令看起来是这样的。
@@ -88,14 +83,6 @@ fi
 
 如果不写test命令的condition部分，它会以非零的退出状态码退出，并执行else语句块。
 
-bash shell提供了另一种条件测试方法，无需在if-then语句中声明test命令：
-
-````
-if [ condition ]  //中括号两边有空格
-then 
-	commands
-fi
-````
 
 ## 整数比较
 
@@ -148,7 +135,7 @@ echo中可以输出，但test命令中，不可使用浮点值。
 sort命令使用的是系统的本地化语言设置中定义的排序顺序。
 
 
-## 文件比较
+## 文件状态及比较
 
 用来测试Linux文件系统上文件和目录的状态。
 
@@ -179,7 +166,7 @@ sort命令使用的是系统的本地化语言设置中定义的排序顺序。
 ````
 比如：
 ````
-f [ "$expr1" -a "$expr2" ]
+if [ "$expr1" -a "$expr2" ]
 then
   echo "Both expr1 and expr2 are true."
 else
@@ -221,7 +208,7 @@ fi
 bash shell提供了两项可在if-then语句中使用的高级特性：
 
 * 用于数学表达式的双括号 ``(( ))``
-* 用于高级字符串处理功能的双方括号``[[ ]]``
+* 用于高级字符串处理功能的双方括号``[[ ]]``，支持正常表达式
 
 ## 使用双括号  (( ))
 

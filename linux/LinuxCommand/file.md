@@ -135,7 +135,7 @@ cat [OPTION]...  [FILE]...
 ````
 tac [OPTION]...  [FILE]...
 ````
-3. nl 显示的时候，连同秸一起输出  
+3. nl 显示的时候，连同行一起输出  
 用法：
 ````
 nl [OPTION]...  [FILE]...
@@ -246,23 +246,76 @@ locate [OPTION]...  PATTERN...
 locate的使用比whereis更简单，直接在后面输入 "文件的部分名称" 后，就能得到结果了。例如我们这个例子输入的是 locate passwd，那么，在完整的文件名(包含路径名称)中，只要其中有passwd，就会被搜索显示出来。如果忘记了某个文件的完整文件名时，这是以恶很方便好用的命令。
 locate来搜索文件也非常的快，这是因为locate与whereis命令一样都是从数据库中去搜索文件，所以比find命令直接去硬盘里搜索速度要快的多。
 4. find   
-
+find命令是用来在给定的目录下查找符合给定条件的文件
 
 ## 打包及压缩
 
 相关命令：gzip,bzip2,zip,tar,gunzip
 
-### 压缩及打包
+* 命令：gzip  (压缩文件)
+　压缩文件后缀.gz
+　ps: gzip test.txt 　　结果：生成文件test.txt.gz，原文件test.txt消失。
+　注意：只能压缩文件，不能压缩目录，压缩后不保留 原始文件，压缩比大概1/5
+　解压命令：gunzip
 
+* tar （打包压缩目录）
+严格意义上来说此命令为“打包”命令，将目录打包成一个``*.tar``文件
+  语法：tar 选项 压缩后文件名 目录
+  压缩文件后缀：``*.tar.gz``
+  选项：[-zcvf]　　-c 打包
+　　　　　　　　　-v 显示详细信息
+　　　　　　　　　-f  指定后文件名
+　　　　　　　　　-z 打包同时压缩
+``mkdir Japan``                       生成Japan目录
+``tar -zcvf Japan.tar.gz Japan`` 生成Japan.tar.gz压缩文件
+ 解压命令：tar [选项] 压缩文件.tar.gz
+  [-zxvf]  -x 解包
+　-v 显示详细信息
+　-f  指定后文件名
+　-z 解压缩
+``tar -zxvf Japan.tat.gz``
 
+* zip （压缩文件或目录）
+  压缩文件后缀 :``*.zip``
+  语法：zip [选项] 压缩后文件名 文件或目录
+  -r    压缩目录
+``zip -r Japan.zip Japan``   压缩目录Japan,生成Japan.zip文件。
+``zip  test.txt.zip test.txt``  压缩文件test.txt,生成test.txt.zip文件，保留原始文件
+解压命令：unzip  文件名
+注意:压缩后保留原始文件，压缩比不如gzip.
 
-### 解压缩
+* bzip2        (gzip的升级版，压缩比惊人)
+  压缩文件后缀：*.bz2
+ 语法：bzip2 [选项] 文件
+ -k  压缩后保留原始文件
+ ```bzip2 -k test.txt```    生成test.txt.bz2文件，原始文件test.txt保留着。
+打包压缩 ``tar -cjvf`` 打包压缩后文件名  目录
+解包解压 ``tar -xjvf`` 文件
 
 
 ### 列出内容
-
+Syntax|Description|Example(s)
+---|---|---
+gzip -l {.gz file}|	List files from a GZIP archive	|gzip -l mydata.doc.gz
+unzip -l {.zip file}|	List files from a ZIP archive|	unzip -l mydata.zip
+tar -ztvf {.tar.gz} tar -jtvf {.tbz2}|	List files from a TAR archive|	tar -ztvf pics.tar.gz  或 tar -jtvf data.tbz2
 
 
 ## 文件类型
+
+文件类型标识|文件类型
+---|---
+-|普通文件
+d|目录
+l|	符号链接
+s（伪文件）|套接字
+b（伪文件）|块设备
+c（伪文件）|字符设备
+p（伪文件）|管道
+
+
+占用存储空间的类型：文件、目录、符号链接。
+符号链接记录的是路径，路径不长时存在innode里面。
+其他四种：套接字、块设备、字符设备、管道是伪文件，不占用磁盘空间。
 
 参考：[打包及压缩](https://www.cyberciti.biz/howto/question/general/compress-file-unix-linux-cheat-sheet.php)

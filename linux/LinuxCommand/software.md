@@ -219,10 +219,6 @@ apt-get clean
 ````
 
 
-
-
-
-
 ### aptitude（更高级的管理工具，多一个gui端管理工具）
 
 

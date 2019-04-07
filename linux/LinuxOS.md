@@ -26,15 +26,27 @@ Linux定义一些库函数来将系统调用组合成某些常用的功能。
 使用库函数可以把程序员从细节中解救出来。
 当然你也可以不使用库函数，而直接使用系统调用。
 一个操作系统要称上是UNIX系统，必须要拥有一些库函数，比如 ISO C标准库，POSIX标准等。
+## GNU工具
+GNU组织开发了一套Unix工具，GNU核心工具组（英语：GNU Core Utilities，亦常缩写为coreutils）是一个 GNU 软件包，它包含了许多基本工具（如cat，ls 和 rm）在类 Unix 操作系统上的重新实现。
+
+Linux由Linux内核和GNU工具结合而成，也称为GNU/Linuxt系统。
+
+coreutils由三部分构成：
+* 处理文件的工具
+* 操作文件的工具
+* 管理进程的工具
 
 ## shell
 
-一个特殊的应用。shell是一个命令解释器(interpreter)，当我们输入``ls -l``时，它将此字符串解释为:
+一个特殊的应用。
+shell是一个命令解释器(interpreter)，当我们输入``ls -l``时，它将此字符串解释为:
 1. 在指定路径找到该文件(比如：``/bin/ls``)
 2. 执行该文件，并附带参数``-l``
 
 shell是可编程的，这可以执行符合shell语法的文本(shell script)。
 从架构图中可以看到，shell下通系统调用，上通各种应用，同时还有许多自身的小工具可以使用。
+
+在Linux系统中，通常有好几种Linux shell可用。默认是bash shell(由GNU开发)
 
 ## 一般的应用
 应用是一个程序，它可以

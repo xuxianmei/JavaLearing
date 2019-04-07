@@ -24,7 +24,7 @@ netstat [OPTION]
 -c：持续刷新
 --verbos：不支持地址组
 ````
-[netstat常见用法](commonUse/netstat常见用法)
+[netstat常见用法](commonUse/netstatExample.md)
 
 ### tcpdump
 网络嗅探工具，能够获取网络接口上的所有数据包。

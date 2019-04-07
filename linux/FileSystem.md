@@ -79,8 +79,8 @@ Inode表，每个Inode记录了文件的权限和属性。
 ![](images/filesystem-2.jpg)
 
 
-## 写时复制文件系统
-
+## 写时复制机制 就是编程界“懒惰行为”
+https://www.cnblogs.com/lengender-12/p/7054896.html
 参考：
 
 [鸟哥](https://wizardforcel.gitbooks.io/vbird-linux-basic-4e/content/59.html)
