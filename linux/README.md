@@ -29,9 +29,9 @@
 ### [循环语句](Shell/loop.md)
 ### [输入处理](Shell/input.md)
 ### [数据呈现](Shell/output.md)
-### [控制脚本]((Shell/control.md))
-### [函数]((Shell/function.md))
-### [sed编辑器（待完成）]((Shell/sed.md))
+### [控制脚本](Shell/control.md)
+### [函数](Shell/function.md)
+### [sed编辑器（待完成）](Shell/sed.md)
 
 
 ### 基础语法
