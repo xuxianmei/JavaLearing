@@ -2,8 +2,10 @@
 shell脚本最常见的一个用途就是处理文本文件。
 使用sed和gawk能够轻松实现自动格式化、插入、修改、替换、删除文本元素。
 
-sed编辑器被称为流编辑器（stream editor），和普通的交互式文本编辑器愉好相反。
+sed编辑器被称为流编辑器（stream editor）。
+与普通的交互式文本编辑器愉好相反。
 在文本编辑器中，可以用键盘命令来交互式地插入、删除和替换数据中的文本。
+
 流编辑器则会在编辑器处理数据之前基于预先提供的一组规则来编辑数据流。
 
 sed编辑器可以根据命令来处理数据流中的数据，这些命令要么从命令行中输入，要么存储在
@@ -34,7 +36,7 @@ options允许你修改sed命令的行为
 ---|---
 -e script|在处理输入时，将script中指定的命令添加到已有的命令中
 -f file|在处理输入时，将file中指定的命令添加到已有的命令中
--n|不产生命令输出，使用print命令来完成输出
+-n|仅显示script处理后的结果
 
 sed命令
 ---
@@ -163,6 +165,7 @@ sed 's!/bin/bash!/bin/csh! '  /etc/passwd
 ### 数字方式的行寻址
 当使用数字方式的行寻址时，可以用行在文本流中的行位置来引用。
 sed编辑器会将文本流中的第一行编号为1。
+最后一行为$
 
 在命令中指定的地址可以是单个行号，或是用起始行号、逗号以及结尾行号指定的一定
 区间范围内的行。
@@ -178,14 +181,14 @@ sed '2,$s/dog/cat/' data1.txt  #第2-最后一行
 注：如果要在指定的行上，执行多个命令，需要使用
 ```
 addresss{
-	command1
-	command2
-	command3
+	[address]command1
+	[address]command2
+	[address]command3
 }
 ```
 或者
 ```
-addresss{ command1;command2;command3 }
+addresss{ [address]command1;[address]command2;[address]command3 }
 ```
 
 ### 使用文本模式过滤器
@@ -487,16 +490,170 @@ g| 将保持空间内容复制到模式空间
 G| 将保持空间内容附加到模式空间
 x| 并换两个空间的内容
 
-TODO：范例
+通常，使用h或H将字符串移动到保持空间后，最终还是要用g、G、x命令将保存的字符串
+移回到模式空间（否则，一开始就没有必要保存它们了）。
+范例：
+```
+echo "This is the header line.
+This is the first data line
+This is the second data line
+This is the third data line
+This is the footer line." | sed -n "/first/{h;p;n;p;g;p}"
+输出：
+This is the first data line
+This is the second data line
+This is the first data line
+```
+步骤解释：
+1. 使用正则表达式文本模式``/first/``，过滤包含fisrt的行
+2. 当满足模式的条件行出现时，将模式空间的内容复制到保存空间
+3. p命令打印模式空间中的内容
+4. n读取下一行数据流更新当前模式空间
+5. p命令打印模式空间中的内容
+6. g将保存空间内容复制到模式空间中的内容
+7. 打印模式空间内容
 
-## 排除命令
+## 排除命令 ：!
+```
+[address]!command
+```
+排除命令``!``（感叹号），让原本会起作用的命令不起作用。
+可以这么理解：表示后面的命令对所有没有被address选定的行发生作用。（或者可以理解为反转了命令作用效果）
+>如果没有address限定部分行，个人觉得``!``命令没有任何必要。因为相当于不作用于任何行。
 
-## 改变流
+范例：
+```
+echo "This is the header line.
+This is the first data line
+This is the second data line
+This is the third data line
+This is the footer line." | sed -n "/first/!p"
+输出：包含first的行p命令不起作用，其它行p起作用。
+This is the header line.
+This is the second data line
+This is the third data line
+This is the footer line.
+```
 
-### 分支
-### 测试
+文本反转
+```
+echo "This is the header line.
+                   This is the first data line
+                   This is the second data line
+                   This is the third data line
+                   This is the footer line." | sed  -n '1!G;h;$p'
+输出：
+This is the footer line.
+This is the third data line
+This is the second data line
+This is the first data line
+This is the header line.
+```
+>可以理解为使用两个Quene，来实现一个Stack。
+>其中每次第一个行为操作：读取一个新数据放置到模式空间队列中。
 
-## 模式替代
+改变流
+---
+通常，sed编辑器会从脚本的顶部开始，一直执行到脚本的结尾
+>D命令是个例外，它会强制sed编译器返回到脚本的顶部，而不读取新的行。
+>这里的脚本的顶部，不是指文本文档的顶部，而是sed命令脚本。
+>也就是说，不重新读取新的行到模式空间，针对模式空间重新执行一遍sed命令。
+
+sed编辑器提供了一个方法来改变命令脚本的执行流程，其结果与结构化编程类似。
+
+## 分支命令：b
+
+分支命令可以基于地址、地址模式、地址区间排除一整块命令。
+这允许你只对数据流中的特定行执行一组命令。
+>可以理解为``goto label``;
+
+格式：
+[address]b [label]
+
+>如果没有address限定部分行，``b``命令没有任何必要。因为相当于不作用于任何行。
+
+address参数决定了哪些行会的数据会触发分支命令。
+lable参数定义了要跳转到的位置。
+>如果没有label，会跳转到脚本的结尾。类似：continue;
+
+范例:
+>其中，限定了``/first/``匹配的行，路过``s/This/That/``,所有行都执行两个替换命令This->That，the->The。
+
+```
+ echo "This is the header line.
+This is the first data line
+This is the second data line
+This is the third data line
+This is the footer line." | sed  -n '{/first/b label1;s/This/That/;:label1 s/the/The/;p}'
+输出：
+That is The header line.
+This is The first data line
+That is The second data line
+That is The third data line
+That is The footer line.
+```
+## 测试命令：t
+测试命令``t``也可以用来改变sed编辑器脚本的执行流程。
+测试命令``t``根据替换命令的结构跳转到某个标签。
+>如果没有指定标签，同样相当于continue。
+
+格式：
+[address]t [label]
+
+范例：当发生一个替换，就不再执行另一个替换
+
+```
+echo "This is the header line.
+This is the first data line
+This is the second data line
+This is the third data line
+This is the footer line." | sed  '{/first/s/first/XXXX/;t;s/This/That/;}'
+输出：
+That is the header line.
+This is the XXXX data line
+That is the second data line
+That is the third data line
+That is the footer line.
+```
+范例：当第三行发生一个替换时，跳到This->THIS
+```
+echo "This is the header line.
+This is the first data line
+This is the second data line
+This is the third data line
+This is the footer line." | sed  '{/data/s/data/XXXX/;3t label1 ;s/This/That/;:label1 s/This/THIS/}'
+That is the header line.
+That is the first XXXX line
+THIS is the second XXXX line
+That is the third XXXX line
+That is the footer line.
+```
+>如果没有跳转命令，只有:label时，并不影响正常流程。
+
+注意：排除命令``!``同样适用于分支命令``b``和测试命令``t``
+
+## 模式替代命令:&
+在脚本中，模式替代命令``&``，类似于高级语言中的this。
+范例：为cat加上双引号
+```
+ echo "The cat sleeps" | sed '{s/cat/"&"/}'
+The "cat" sleeps
+```
+>&相当于匹配模式匹配的整个字符串。
+
+## 子模式替代命令：\数字（\1,\2,\3...\n）
+子模式替代命令，主要用于匹配正则表达式文本模式时的分组。
+```
+ echo "The cat is doing something" | sed "{s#\(cat\).is.\(doing\) some.*#\1 is moveing#}"
+The cat is moveing
+```
+
+## 在脚本中使用sed（TODO，简单，不重要）
+
+## 创建sed实用工具（TODO范例）
+
+
+
 
 
 

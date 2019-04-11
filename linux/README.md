@@ -31,7 +31,9 @@
 ### [数据呈现](Shell/output.md)
 ### [控制脚本](Shell/control.md)
 ### [函数](Shell/function.md)
-### [sed编辑器（待完成）](Shell/sed.md)
+### 字符串处理
+#### [sed（待完成）](Shell/sed.md)
+#### [gawk（待完成）](Shell/gawk.md)
 
 
 ### 基础语法
