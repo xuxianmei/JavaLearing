@@ -32,8 +32,8 @@
 ### [控制脚本](Shell/control.md)
 ### [函数](Shell/function.md)
 ### 字符串处理
-#### [sed（待完成）](Shell/sed.md)
-#### [gawk（待完成）](Shell/gawk.md)
+#### [sed（待完成一些示例）](Shell/sed.md)
+#### [gawk（待完成一些示例）](Shell/gawk.md)
 
 
 ### 基础语法
