@@ -31,13 +31,11 @@
 ### [数据呈现](Shell/output.md)
 ### [控制脚本](Shell/control.md)
 ### [函数](Shell/function.md)
-### 文本及字符串处理
+## 文本及字符串处理
 #### [sed（待完成一些示例）](Shell/sed.md)
 #### [gawk（待完成一些示例）](Shell/gawk.md)
 #### [grep（待完成）](Shell/grep.md)
 
-
-### 基础语法
 
 ### 实践范例
 
