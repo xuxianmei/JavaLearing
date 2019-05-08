@@ -12,7 +12,7 @@
 
 ## [泛型](Generics.md)
 
-## [集合](collections)
+## [集合](collection.md)
 
 ## [委托](delegate.md)
 
