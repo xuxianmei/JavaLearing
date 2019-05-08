@@ -37,6 +37,7 @@ CLI是一个标准，而.NET Framework是这个标准的具体实现。
 CIL最初是随着.NET由微软一起发布的，因此之前也叫做MSIL（Microsoft Intermediate Language），后来进行了标准化，之后便被称做CIL。CIL也简称为IL。
 
 * 源代码文件编译成CIL的编译过程
+
 ![](./images/CompileToCIL.jpg)
 
 * 程序运行时CIL编译成本机代码
