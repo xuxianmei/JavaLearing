@@ -46,9 +46,6 @@
 ### async await
 
 
-
-### [进程、线程和应用程序域](./basic/Process_Thread_AppDomain.md)
-
 * 参考书籍
 
 [CLR Via C#]()
