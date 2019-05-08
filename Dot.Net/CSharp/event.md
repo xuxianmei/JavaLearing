@@ -3,14 +3,19 @@
 事件：当一个类型中定义了事件成员时，允许此类型（或类型的实例）通知其他对象发生了特定的事情。
 
 在使用委托来实现发布————订阅模式时。
+
 有可能会碰到两个问题
 * 异常处理
-为了避免委托链中，某个委托触发异常时，导致后面的委托得不到执行的情况，
-需要获取委托链列表，迭代显式执行每一个委托，并将显式调用放在一段try中，单独处理每一个委托
-触发的异常，并返回一个AggregateException异常（一个异常集合）。
+
+	为了避免委托链中，某个委托触发异常时，导致后面的委托得不到执行的情况，
+
+	需要获取委托链列表，迭代显式执行每一个委托，并将显式调用放在一段try中，单独处理每一个委托
+
+	触发的异常，并返回一个AggregateException异常（一个异常集合）。
 
 * 返回值。
-如果委托不返回void，或者有ref或out参数，也有必要遍历委托链列表。
+	
+	如果委托不返回void，或者有ref或out参数，也有必要遍历委托链列表。
 
 
 事件这可以解决这两个问题。
@@ -22,6 +27,7 @@
 CLR事件模型以委托为基础。
 
 定义了事件成员的类型能提供以下功能
+
 * 方法能登记它对事件的关注
 
 * 方法能注销它对事件的关注
@@ -33,7 +39,9 @@ CLR事件模型以委托为基础。
 ```
 event 委托类型的名称 事件变量的名称
 ```
+
 比如：
+
 ````
 //委托类型定义
 public delegate void FeedBack(Int32 value);
@@ -44,6 +52,7 @@ public event FeedBack feedBack;
 ````
 
 ## 设计一个公开事件的类型
+
 要设计一个公开事件的类型，需要几步操作
 
 1. 定义类型来容纳所有需要发送给事件通知接收者的**事件附加信息**
@@ -89,19 +98,31 @@ internal class MailManager
     public event EventHandler<NewMailEventArgs> NewMail;
 }
 ````
+
 FCL中``System.EventHandler<T>``的定义
+
 ```
 public delegate void EventHandler<TEventArgs>(object sender, TEventArgs e);
 ```
+
 所以委托声明的方法原型为：
+
 ```
 void MethodName(Object sender,NewMailEventArgs e);
 ```
-NewMail是事件名称。事件成员类型为``EventHandler<NewMailEventArgs>``，
+
+NewMail是事件名称。
+
+事件成员类型为``EventHandler<NewMailEventArgs>``，
+
 这意味着事件通知的接收者必须提供一个与``EventHandler<NewMailEventArgs>``委托类型匹配的方法。sender代表事件调用的对象，e为事件通知时传递的附加信息。
+
 #### 3. 定义触发事件通知的方法
+
 按照约定，类要定义一个受保护的虚方法。
+
 引发事件时，类及其派生类中的代码会调用该方法。
+
 方法只获取一个参数，即一个``NewMailEventArgs``对象，其中包含了传给接收通知的对象的信息。
 
 ```
