@@ -3,13 +3,17 @@
 ### 什么是CLR
 
 
-通用语言运行时(Common Language Runtime，简称CLR)是微软为他们的.Net虚拟机所选用的名称。Common Language Infrastructure（公共语言基础）中VES的实现，它定义了一个代码运行的环境。CLR运行一种称为“通用中间语言”的字节码，这个是微软的通用中间语言实现版本。
+通用语言运行时(Common Language Runtime，简称CLR)是微软为他们的.Net虚拟机所选用的名称。
 
+CLR是Common Language Infrastructure（公共语言基础）中VES的实现，它定义了一个代码运行的环境。
 
+CLR运行一种称为“通用中间语言”的字节码，这个是微软的通用中间语言实现版本。
 
 CLR的核心功能可由面向CLR的所有语言使用。
+
 可用任何编程语言编写代码，只要编译器是面向CLR的。
-每个面向CLR的编译器生成的代码都是IL代码，IL代码也称为托管代码，因为CLR管理它的执行。
+
+每个**面向CLR的编译器**生成的代码都是IL代码，IL代码也称为**托管代码**，因为CLR管理它的执行。
 
 ### CLR的核心功能
 * 程序集加载
@@ -22,6 +26,7 @@ CLR的核心功能可由面向CLR的所有语言使用。
 ### 将源代码编译成托管模块
 
 面向CLR的编译器将源代码编译生成托管模块(managed module)。
+
 托管模块是一个标准的 32 位 Microsoft Windows 可移植执行体（PE32）文件，或者是一个标准的 64 位 Windows 可移植执行体（PE32+）文件，它们都需要 CLR 才能执行。
 
 托管模块的组成部分
