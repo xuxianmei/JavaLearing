@@ -7,39 +7,52 @@
 
 **Lambda表达式**其实就是一种**编写匿名函数的语法糖**。
 
- * Lambda表达式的目
+##  Lambda表达式的目
+
 避免在需要很简单的方法生成委托时，声明全新的方法。
+
 Lambda表达式可以不指定方法名，可访问性和返回类型，有时甚至可以不指定参数类型和return等
 
 * 语句Lambda和表达式Lambda
 	* 语句Lambda
-````
+
+	````
 	  Func<int,int,bool>  f1= (int  x, int y) => {
                 return x > y;
                 };
-````
+	````
+
 	* 表达式Lambda
-````
+
+	````
 	Func<int,int,bool>  f1= (int x, int y) => x > y;
 	Func<int,int,bool>  f1= ( x,  y) => x > y;
-````
+	````
 
 ## Lambda与外部变量
 
 在Lambda表达式外部声明的局部变量，称为Lambda表达式的外部变量。
+
 当Lambda主体使用一个外部变量的时候，就说变量被这个Lambda表达式捕捉（形成闭包）。
 
 
 局部变量的生存期一般和它的作用域绑定，离开作用域后，变量的存储位置就不再有效。
+
 但是，如果Lambda表达式捕捉了外部变量，根据该表达式创建的委托可能具有比外部变量在一般情况 下更长（或更短）的生存期。
+
 因为委托每次被调用时，都必须能安全地访问外部变量，在这种情况下，被捕捉的变量的生存期被延长了。
+
 这个生存期至少与存活时间最长的委托对象一样长。
 
-注：Lambda不是立马执行的（因为Lambda表达式就是编写了一个方法），只有等到委托调用此方法时，才会执行，所以委托要为Lambda表达式存储这个外部变量。
+>注：Lambda不是立马执行的（因为Lambda表达式就是编写了一个方法），
+>
+>只有等到委托调用此方法时，才会执行，所以委托要为Lambda表达式存储这个外部变量。
 
-委托本身就是一个类，在编译的时候，会为委托创建一个类，如果Lambda捕捉了外部变量，那么编译
-器会将每个外部变量作为这个类的实例字段实现。所有使用外部局部变量的地方都被重写为使用
-这个实例字段。
+委托本身就是一个类，在编译的时候，会为委托创建一个类。
+
+如果Lambda捕捉了外部变量，那么编译器会将每个外部变量作为这个类的实例字段实现。
+
+所有使用外部局部变量的地方都被重写为使用这个实例字段。
 
 这就会产生所谓的闭包。
 
@@ -90,6 +103,7 @@ output:
 ````
 
 foreach中循环外部变量
+
 ````
 var actions = new List<Action>();
 var names = new String[] { "A", "B", "C" };
@@ -118,15 +132,17 @@ C# 5.0以后认为foreach中的每一次迭代，都是一个新的变量。所�
 
 ## Lambda表达式树
 
-表达式树主要是为LINQ而引入.NET的。
+表达式树主要是为LINQ（Language Integrated Query 语言集成查询）而引入.NET的。
 
-将Lambda表达式转换成 System.Linq.Expressions.Expression<TDelegate>将创建
+将Lambda表达式转换成`System.Linq.Expressions.Expression<TDelegate>`将创建
 一个表达式树，而不是委托。
 
 表达式树主要用LINQ。
+
 语言集成查询 (LINQ)，通过LINQ， 可以使用语言关键字和熟悉的运算符针对强类型化对象集合编写查询。 
 
 Lambda表达式提供了一种简洁的语法来定义代码中"内联"方法，使其能转换成委托类型。
+
 表达式Lambda（不是语句Lambda和匿名方法）也能转换成表达式树。
 
 
@@ -135,14 +151,15 @@ Lambda表达式提供了一种简洁的语法来定义代码中"内联"方法，
 **表达式树**也是一个**对象**，允许传递**编译器对Lambda主体的分析**。
 
 
-这个分析有什么有用呢？显然编译器的分析在生成CIL时对编译器有用。
+这个分析有什么有用呢？
+显然编译器的分析在生成CIL时对编译器有用。
+
 但为什么说在程序执行时，开发人员拥有代表这种分析的一个对象有用呢。
 
-1. Lambda表达式作为数据使用。
+### Lambda表达式作为数据使用。
 
 ````
-persons.Where(
-	person=>psrson.Name.Contains("TOM"));
+persons.Where(person=>psrson.Name.Contains("TOM"));
 ````
 
 现在假设persons不是Person[]类型，而是代表数据库表的对象，表中包含数百万人的数据。
@@ -150,8 +167,8 @@ persons.Where(
 表中的每一行的信息都可以从服务器传输到客户端，客户端创建一个Person对象来代表那一行。
 
 现在有两种技术可以做到:
-一个技术是将所有数据行全部传输到客户端，为每一行创建一个Person对象，根据Lambda创建一个
-委托，再对每一个Person对象执行这个委托，筛选符合条件的对象。
+
+第一个技术是将所有数据行全部传输到客户端，为每一行创建一个Person对象，根据Lambda创建一个委托，再对每一个Person对象执行这个委托，筛选符合条件的对象。
 
 第二个技术是，将Lambda的含义(过滤掉姓名不包含TOM的每一行）发送给服务器。
 数据库服务器本来就很擅长快速执行这种筛选。然后，数据库服务器只将符合条件的少数几行传输
@@ -166,9 +183,11 @@ persons.Where(
 
 
 
-Expression<Tdelegate>是从LambdaExpression派生的
-LambdaExpression是从Expression派生的类型之一。
-Tdelegate：代表泛型委托
+`Expression<Tdelegate>`是从LambdaExpression派生的
+
+`LambdaExpression`是从`Expression`派生的类型之一。
+
+`Tdelegate`代表泛型委托
 
 
 当然不光只有Lambda表达式树这一种，还有很多其他种类的Expression。
