@@ -28,3 +28,5 @@
 ## 开源 Redis监控运维云平台CacheCloud（TODO）
 ## 配置字典（TODO）
 
+## 参考书籍
+《Redis开发与运维》
